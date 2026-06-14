@@ -166,18 +166,10 @@ function renderNews(items) {
         btn.title = 'テキストを取得中...';
         const result = await window.electronAPI.fetchArticleText(n.url);
         if (result.ok) {
-          let finalText = result.text;
-          // Claude APIキーが設定されていればLLMでノイズ除去
-          const apiKey = localStorage.getItem('task_dashbord_anthropic_key') || '';
-          if (apiKey) {
-            btn.title = 'AIでクリーンアップ中...';
-            const llmResult = await window.electronAPI.llmCleanText(result.text, apiKey);
-            if (llmResult.ok) finalText = llmResult.text;
-          }
-          window.scrapbook.updateTextContent(n.url, finalText);
-          btn.title = apiKey ? 'AI本文抽出済み' : 'テキスト保存済み';
+          window.scrapbook.updateTextContent(n.url, result.text);
+          btn.title = result.method === 'readability' ? '本文抽出済み（Readability）' : '本文抽出済み';
         } else {
-          btn.title = 'スクラップ済み（テキスト取得失敗）';
+          btn.title = 'スクラップ済み（本文取得失敗）';
         }
       } else if (!saved && window.electronAPI) {
         // ★解除時にローカルHTMLも削除

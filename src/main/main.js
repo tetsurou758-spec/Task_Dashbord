@@ -5,6 +5,8 @@ const fs = require('fs');
 const { spawn } = require('child_process');
 const https = require('https');
 const http = require('http');
+const { Readability } = require('@mozilla/readability');
+const { JSDOM } = require('jsdom');
 
 let mainWindow;
 let backendProcess;
@@ -227,7 +229,30 @@ function extractText(html) {
     .trim();
 }
 
-// IPC: 記事のテキスト全文を取得して返す（meta-refreshリダイレクト対応）
+// Readability.js で記事本文を抽出（Firefoxリーダービューと同アルゴリズム）
+function extractWithReadability(html, url) {
+  try {
+    const dom = new JSDOM(html, { url });
+    const reader = new Readability(dom.window.document);
+    const article = reader.parse();
+    if (!article || !article.textContent) return null;
+
+    // テキストを整形（連続空行・空白を圧縮）
+    const text = article.textContent
+      .split('\n')
+      .map(l => l.replace(/\s+/g, ' ').trim())
+      .filter(l => l.length > 0)
+      .join('\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+
+    return { text, title: article.title || '' };
+  } catch {
+    return null;
+  }
+}
+
+// IPC: 記事のテキスト全文を取得して返す（Readability優先・フォールバック付き）
 ipcMain.handle('fetch-article-text', async (_, url) => {
   try {
     let html = await fetchUrl(url);
@@ -240,60 +265,19 @@ ipcMain.handle('fetch-article-text', async (_, url) => {
       html = await fetchUrl(url);
     }
 
-    const text = extractText(html);
-
-    if (text.length < 60) {
-      return { ok: false, error: `コンテンツ取得不可（${text.length}文字）: ログイン必須またはJS描画ページの可能性` };
+    // Step1: Readability.js で本文抽出（Firefoxリーダービューと同等）
+    const readResult = extractWithReadability(html, url);
+    if (readResult && readResult.text.length >= 80) {
+      return { ok: true, text: readResult.text, method: 'readability' };
     }
-    return { ok: true, text };
-  } catch (err) {
-    return { ok: false, error: err.message };
-  }
-});
 
-// IPC: Claude APIで抽出テキストを記事本文のみにクリーンアップ
-ipcMain.handle('llm-clean-text', async (_, { rawText, apiKey }) => {
-  if (!apiKey) return { ok: false, error: 'API Keyが未設定です（設定画面で入力してください）' };
-  try {
-    const body = JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 4096,
-      messages: [{
-        role: 'user',
-        content: `以下はWebページから抽出したテキストです。ナビゲーションメニュー・広告・サイドバー・フッター・関連記事リンク・著作権表記などのノイズを除去し、記事の本文（見出しと本文段落）のみを抽出してください。\n箇条書きや見出しは保持し、本文の内容は一切変更しないでください。\n\n---\n${rawText.slice(0, 8000)}\n---`,
-      }],
-    });
+    // Step2: 段落ベースのヒューリスティック抽出にフォールバック
+    const text = extractText(html);
+    if (text.length >= 60) {
+      return { ok: true, text, method: 'heuristic' };
+    }
 
-    const result = await new Promise((resolve, reject) => {
-      const req = https.request({
-        hostname: 'api.anthropic.com',
-        path: '/v1/messages',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'Content-Length': Buffer.byteLength(body),
-        },
-        timeout: 30000,
-      }, (res) => {
-        let data = '';
-        res.on('data', c => data += c);
-        res.on('end', () => {
-          try {
-            const json = JSON.parse(data);
-            if (json.content && json.content[0]) resolve(json.content[0].text);
-            else reject(new Error(json.error?.message || 'APIエラー'));
-          } catch (e) { reject(e); }
-        });
-      });
-      req.on('error', reject);
-      req.on('timeout', () => { req.destroy(); reject(new Error('timeout')); });
-      req.write(body);
-      req.end();
-    });
-
-    return { ok: true, text: result };
+    return { ok: false, error: `本文取得不可（${text.length}文字）: ログイン必須またはJS描画ページの可能性` };
   } catch (err) {
     return { ok: false, error: err.message };
   }
