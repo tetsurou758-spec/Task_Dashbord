@@ -55,12 +55,26 @@ async function fetchRssDirect(url) {
     const parser = new DOMParser();
     const xml = parser.parseFromString(xmlText, 'text/xml');
     const items = [...xml.querySelectorAll('item')];
-    return items.map(item => ({
-      title:    item.querySelector('title')?.textContent?.trim() || '',
-      summary:  stripHtml(item.querySelector('description')?.textContent || '').slice(0, 120),
-      url:      item.querySelector('link')?.textContent?.trim() || '',
-      pubDate:  item.querySelector('pubDate')?.textContent || new Date().toISOString(),
-    }));
+    return items.map(item => {
+      const rawUrl   = item.querySelector('link')?.textContent?.trim() || '';
+      const desc     = item.querySelector('description')?.textContent || '';
+
+      // Google News RSSはリダイレクトURL → descriptionの<a href>から実記事URLを抽出
+      let articleUrl = rawUrl;
+      if (rawUrl.includes('news.google.com')) {
+        const hrefMatch = desc.match(/href=["']([^"']+)["']/i);
+        if (hrefMatch && hrefMatch[1] && !hrefMatch[1].includes('news.google.com')) {
+          articleUrl = hrefMatch[1];
+        }
+      }
+
+      return {
+        title:    item.querySelector('title')?.textContent?.trim() || '',
+        summary:  stripHtml(desc).slice(0, 120),
+        url:      articleUrl,
+        pubDate:  item.querySelector('pubDate')?.textContent || new Date().toISOString(),
+      };
+    });
   } catch (e) {
     console.warn('[RSS]', url, e.message);
     return [];

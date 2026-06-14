@@ -163,12 +163,19 @@ function renderNews(items) {
       btn.classList.toggle('starred', saved);
 
       if (saved && window.electronAPI) {
-        // バックグラウンドでテキスト全文を取得・保存（失敗しても★は維持）
         btn.title = 'テキストを取得中...';
         const result = await window.electronAPI.fetchArticleText(n.url);
         if (result.ok) {
-          window.scrapbook.updateTextContent(n.url, result.text);
-          btn.title = 'テキスト保存済み';
+          let finalText = result.text;
+          // Claude APIキーが設定されていればLLMでノイズ除去
+          const apiKey = localStorage.getItem('task_dashbord_anthropic_key') || '';
+          if (apiKey) {
+            btn.title = 'AIでクリーンアップ中...';
+            const llmResult = await window.electronAPI.llmCleanText(result.text, apiKey);
+            if (llmResult.ok) finalText = llmResult.text;
+          }
+          window.scrapbook.updateTextContent(n.url, finalText);
+          btn.title = apiKey ? 'AI本文抽出済み' : 'テキスト保存済み';
         } else {
           btn.title = 'スクラップ済み（テキスト取得失敗）';
         }

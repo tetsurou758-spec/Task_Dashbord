@@ -156,10 +156,19 @@ function extractMetaRefreshUrl(html, baseUrl) {
   return redirectUrl.startsWith('http') ? redirectUrl : new URL(redirectUrl, baseUrl).href;
 }
 
-// HTMLからテキストを抽出（記事本文優先・ノイズ除去）
-function extractText(html) {
-  // ノイズ要素を先に除去
-  let cleaned = html
+// HTMLエンティティをデコード
+function decodeEntities(str) {
+  return str
+    .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(+n))
+    .replace(/&[a-z]+;/g, '');
+}
+
+// ノイズ要素を除去（nav/header/footer/aside/script/style）
+function removeNoise(html) {
+  return html
     .replace(/<script[\s\S]*?<\/script>/gi, '')
     .replace(/<style[\s\S]*?<\/style>/gi, '')
     .replace(/<noscript[\s\S]*?<\/noscript>/gi, '')
@@ -168,36 +177,54 @@ function extractText(html) {
     .replace(/<footer[\s\S]*?<\/footer>/gi, '')
     .replace(/<aside[\s\S]*?<\/aside>/gi, '')
     .replace(/<!--[\s\S]*?-->/g, '');
+}
 
-  // 記事本文エリアを優先抽出（<article> → <main> → class/id="article/content/entry/post"）
-  let content = cleaned;
-  const articleTag = cleaned.match(/<article[\s\S]*?<\/article>/i);
-  const mainTag    = cleaned.match(/<main[\s\S]*?<\/main>/i);
-  const contentDiv = cleaned.match(/<(?:div|section)[^>]+(?:class|id)=["'][^"']*(?:article|entry|post|content|body|text)[^"']*["'][^>]*>([\s\S]*?)<\/(?:div|section)>/i);
-  if (articleTag)   content = articleTag[0];
-  else if (mainTag) content = mainTag[0];
-  else if (contentDiv) content = contentDiv[0];
+// タグ内テキストを取得
+function innerText(html) {
+  return decodeEntities(html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim());
+}
 
-  // タグを除去
-  let text = content.replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n').replace(/<[^>]+>/g, '');
+// HTMLから記事本文を抽出（段落ベース優先・フォールバック付き）
+function extractText(html) {
+  const cleaned = removeNoise(html);
 
-  // HTMLエンティティを変換
-  text = text
-    .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"').replace(/&#39;/g, "'")
-    .replace(/&#\d+;/g, '');
+  // Step1: <article> → <main> → コンテンツ系div を優先エリアとして絞り込む
+  let scope = cleaned;
+  const articleM = cleaned.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
+  const mainM    = cleaned.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
+  // class/id に article|entry|post|content|body を含む div/section
+  const contentM = cleaned.match(/<(?:div|section)[^>]+(?:class|id)=["'][^"']*(?:article|entry|post|content-area|article-body|article-text)[^"']*["'][^>]*>([\s\S]{200,}?)<\/(?:div|section)>/i);
+  if (articleM)   scope = articleM[0];
+  else if (mainM) scope = mainM[0];
+  else if (contentM) scope = contentM[0];
 
-  // 空白行・連続スペースを整理（ここが重要：pre-wrap向けに行数を絞る）
-  text = text
+  // Step2: <p> タグから本文段落を収集（40文字以上のものだけ）
+  const paragraphs = [];
+  const pReg = /<p[^>]*>([\s\S]*?)<\/p>/gi;
+  let m;
+  while ((m = pReg.exec(scope)) !== null) {
+    const t = innerText(m[1]);
+    if (t.length >= 40) paragraphs.push(t);
+  }
+
+  // 段落が2つ以上取れたら成功
+  if (paragraphs.length >= 2) {
+    return paragraphs.join('\n\n').trim();
+  }
+
+  // Step3: <h1>〜<h3> + <p> 混在でも段落が少ない場合、エリア全体をテキスト化
+  const fallback = scope
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/(?:p|h[1-6]|li|div|section|blockquote)>/gi, '\n')
+    .replace(/<[^>]+>/g, '');
+
+  return decodeEntities(fallback)
     .split('\n')
     .map(l => l.replace(/\s+/g, ' ').trim())
-    .filter(l => l.length > 0)
+    .filter(l => l.length >= 15)
     .join('\n')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
-
-  return text;
 }
 
 // IPC: 記事のテキスト全文を取得して返す（meta-refreshリダイレクト対応）
@@ -215,11 +242,58 @@ ipcMain.handle('fetch-article-text', async (_, url) => {
 
     const text = extractText(html);
 
-    // コンテンツが極端に少ない場合は失敗扱い（ログインウォール・JS依存ページ等）
-    if (text.length < 80) {
+    if (text.length < 60) {
       return { ok: false, error: `コンテンツ取得不可（${text.length}文字）: ログイン必須またはJS描画ページの可能性` };
     }
     return { ok: true, text };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+});
+
+// IPC: Claude APIで抽出テキストを記事本文のみにクリーンアップ
+ipcMain.handle('llm-clean-text', async (_, { rawText, apiKey }) => {
+  if (!apiKey) return { ok: false, error: 'API Keyが未設定です（設定画面で入力してください）' };
+  try {
+    const body = JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 4096,
+      messages: [{
+        role: 'user',
+        content: `以下はWebページから抽出したテキストです。ナビゲーションメニュー・広告・サイドバー・フッター・関連記事リンク・著作権表記などのノイズを除去し、記事の本文（見出しと本文段落）のみを抽出してください。\n箇条書きや見出しは保持し、本文の内容は一切変更しないでください。\n\n---\n${rawText.slice(0, 8000)}\n---`,
+      }],
+    });
+
+    const result = await new Promise((resolve, reject) => {
+      const req = https.request({
+        hostname: 'api.anthropic.com',
+        path: '/v1/messages',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'Content-Length': Buffer.byteLength(body),
+        },
+        timeout: 30000,
+      }, (res) => {
+        let data = '';
+        res.on('data', c => data += c);
+        res.on('end', () => {
+          try {
+            const json = JSON.parse(data);
+            if (json.content && json.content[0]) resolve(json.content[0].text);
+            else reject(new Error(json.error?.message || 'APIエラー'));
+          } catch (e) { reject(e); }
+        });
+      });
+      req.on('error', reject);
+      req.on('timeout', () => { req.destroy(); reject(new Error('timeout')); });
+      req.write(body);
+      req.end();
+    });
+
+    return { ok: true, text: result };
   } catch (err) {
     return { ok: false, error: err.message };
   }
