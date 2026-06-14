@@ -39,10 +39,21 @@ function makeId(str) {
 
 async function fetchRssDirect(url) {
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
-    const text = await res.text();
+    let xmlText = '';
+
+    // Electron環境ではメインプロセス経由で取得（CORS・User-Agent制限なし）
+    if (window.electronAPI && window.electronAPI.fetchRss) {
+      const result = await window.electronAPI.fetchRss(url);
+      if (!result.ok) return [];
+      xmlText = result.xml;
+    } else {
+      // ブラウザ直接開き時（デバッグ用）
+      const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+      xmlText = await res.text();
+    }
+
     const parser = new DOMParser();
-    const xml = parser.parseFromString(text, 'text/xml');
+    const xml = parser.parseFromString(xmlText, 'text/xml');
     const items = [...xml.querySelectorAll('item')];
     return items.map(item => ({
       title:    item.querySelector('title')?.textContent?.trim() || '',
@@ -50,7 +61,8 @@ async function fetchRssDirect(url) {
       url:      item.querySelector('link')?.textContent?.trim() || '',
       pubDate:  item.querySelector('pubDate')?.textContent || new Date().toISOString(),
     }));
-  } catch {
+  } catch (e) {
+    console.warn('[RSS]', url, e.message);
     return [];
   }
 }

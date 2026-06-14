@@ -4,4 +4,6 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('electronAPI', {
   // 元ソース（メール/チャット）を外部アプリで開く
   openExternal: (url) => ipcRenderer.send('open-external', url),
+  // メインプロセス経由でRSSを取得（CORS・User-Agent制限なし）
+  fetchRss: (url) => ipcRenderer.invoke('fetch-rss', url),
 });
