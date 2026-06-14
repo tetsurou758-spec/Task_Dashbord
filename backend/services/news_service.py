@@ -23,11 +23,17 @@ RSS_FEEDS = {
         {"url": "https://rss.asahi.com/rss/asahi/newsheadlines.rdf", "source": "朝日新聞"},
         {"url": "https://rss.nikkei.com/rss/nkd/news.rdf",       "source": "日本経済新聞"},
     ],
+    "itconsult": [
+        {"url": "https://www.itmedia.co.jp/enterprise/subtop/features/rss.xml", "source": "ITmedia エンタープライズ"},
+        {"url": "https://japan.zdnet.com/rss/index.rdf",          "source": "ZDNet Japan"},
+        {"url": "https://rss.nikkei.com/rss/nkd/news.rdf",       "source": "日本経済新聞"},
+    ],
 }
 
 # AI・保険関連キーワードフィルター（AIカテゴリで絞り込み）
 AI_KEYWORDS = ['AI', '人工知能', '機械学習', 'ChatGPT', 'Claude', 'Gemini', 'LLM', '生成AI', 'OpenAI', 'Anthropic', 'Microsoft', 'Google']
 INSURANCE_KEYWORDS = ['保険', '損保', '生保', '共済', '代理店', '金融庁', '損害', 'リスク', '契約', '更新']
+ITCONSULT_KEYWORDS = ['DX', 'デジタル変革', 'ITコンサル', 'クラウド', 'システム導入', 'ERP', 'SAP', 'アクセンチュア', 'デロイト', 'マッキンゼー', 'NTTデータ', '富士通', 'IT戦略', 'デジタル']
 
 def _parse_date(entry) -> str:
     """feedparserのエントリから日時文字列を取得"""
@@ -68,6 +74,8 @@ def fetch_news(category: str, limit: int = 10) -> list:
                 if category == "ai" and not _matches_keywords(title + summary, AI_KEYWORDS):
                     continue
                 if category == "insurance" and not _matches_keywords(title + summary, INSURANCE_KEYWORDS):
+                    continue
+                if category == "itconsult" and not _matches_keywords(title + summary, ITCONSULT_KEYWORDS):
                     continue
 
                 if not title or not url:

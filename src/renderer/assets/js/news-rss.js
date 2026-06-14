@@ -19,6 +19,12 @@ const RSS_SOURCES = {
     { url: "https://www3.nhk.or.jp/rss/news/cat0.xml",      source: "NHK",             keywords: [] },
     { url: "https://rss.asahi.com/rss/asahi/newsheadlines.rdf", source: "朝日新聞",    keywords: [] },
   ],
+  itconsult: [
+    { url: "https://www.itmedia.co.jp/enterprise/subtop/features/rss.xml", source: "ITmedia エンタープライズ", keywords: ["DX", "デジタル", "クラウド", "コンサル", "システム", "IT", "SAP", "ERP", "導入"] },
+    { url: "https://japan.zdnet.com/rss/index.rdf",          source: "ZDNet Japan",     keywords: ["DX", "デジタル変革", "クラウド", "コンサル", "IT戦略", "システム", "導入", "アクセンチュア", "デロイト", "マッキンゼー"] },
+    { url: "https://www.cio.com/feed/",                      source: "CIO",             keywords: ["consulting", "digital", "transformation", "cloud", "ERP", "strategy"] },
+    { url: "https://rss.nikkei.com/rss/nkd/news.rdf",       source: "日本経済新聞",    keywords: ["DX", "デジタル変革", "ITコンサル", "システム導入", "アクセンチュア", "デロイト", "フジitec", "NTTデータ", "富士通"] },
+  ],
 };
 
 function stripHtml(html) {

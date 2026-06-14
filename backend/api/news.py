@@ -9,7 +9,7 @@ _cache: dict = {}
 CACHE_TTL = 60 * 30  # 30分
 
 @router.get("/")
-async def get_news(category: str = Query("insurance", regex="^(insurance|ai|general)$")):
+async def get_news(category: str = Query("insurance", regex="^(insurance|ai|general|itconsult)$")):
     now = time.time()
     cached = _cache.get(category)
     if cached and (now - cached["ts"]) < CACHE_TTL:

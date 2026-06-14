@@ -63,6 +63,12 @@ const DEMO_NEWS = {
     { id: 'n6', title: '生成AI市場、2026年に5兆円規模へ拡大予測', summary: 'IDCの調査によると、日本国内の生成AI関連投資は2026年に前年比2倍以上に。', source: 'IDC Japan', url: '#', published_at: new Date(Date.now() - 1000*60*60*5).toISOString() },
     { id: 'n7', title: 'Microsoft 365 Copilot、日本語精度が大幅向上', summary: 'メール・会議要約・文書作成における日本語の自然な表現が改善。', source: 'Microsoft', url: '#', published_at: new Date(Date.now() - 1000*60*60*8).toISOString() },
   ],
+  itconsult: [
+    { id: 'n11', title: 'アクセンチュア、日本企業向けDX支援を強化　AI活用で業務改革加速', summary: '生成AIを活用した業務プロセス改革サービスを拡充。製造・金融・流通向けに特化したソリューションを提供開始。', source: 'ZDNet Japan', url: '#', published_at: new Date(Date.now() - 1000*60*60*1).toISOString() },
+    { id: 'n12', title: '国内DX投資、2026年に3.5兆円超へ　ITコンサル需要が急拡大', summary: 'IDC調査によると企業のデジタル変革投資は前年比22%増。特にクラウド移行とAI導入支援の需要が高い。', source: 'ITmedia エンタープライズ', url: '#', published_at: new Date(Date.now() - 1000*60*60*3).toISOString() },
+    { id: 'n13', title: 'NTTデータ、SAP S/4HANA移行支援で大手製造業と大型契約', summary: '2027年のSAP ECC保守終了に向けた移行需要を取り込み。移行コスト削減のテンプレート展開を推進。', source: '日本経済新聞', url: '#', published_at: new Date(Date.now() - 1000*60*60*5).toISOString() },
+    { id: 'n14', title: 'デロイト トーマツ、生成AI導入支援サービスを本格展開', summary: 'ChatGPT・Claude等を活用した業務効率化支援を各業界向けに提供。ROI測定フレームワークも併せて提供。', source: 'ZDNet Japan', url: '#', published_at: new Date(Date.now() - 1000*60*60*8).toISOString() },
+  ],
   general: [
     { id: 'n8', title: '日銀、追加利上げの可能性を示唆', summary: '植田総裁、経済・物価情勢が見通し通りなら金融緩和の調整を継続と発言。', source: '日本経済新聞', url: '#', published_at: new Date(Date.now() - 1000*60*60*2).toISOString() },
     { id: 'n9', title: '2026年夏の参院選、各党が公約取りまとめへ', summary: '与野党各党が政策立案を本格化。経済政策・社会保障改革が争点の中心に。', source: '朝日新聞', url: '#', published_at: new Date(Date.now() - 1000*60*60*3).toISOString() },
