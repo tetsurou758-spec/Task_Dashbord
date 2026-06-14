@@ -6,59 +6,93 @@
   <title>設定 - Task Dashbord</title>
   <link rel="stylesheet" href="../assets/css/main.css">
 </head>
-<body>
+<body class="settings-page">
+
   <header class="app-header">
     <div class="header-left">
-      <button class="btn-back" onclick="history.back()">← 戻る</button>
+      <button class="btn-icon-label" onclick="location.href='dashboard.html'">
+        <span>← 戻る</span>
+      </button>
+    </div>
+    <div class="header-center">
       <span class="app-title">⚙️ 設定</span>
     </div>
+    <div class="header-right"></div>
   </header>
 
-  <main class="settings-layout">
+  <div class="settings-layout">
 
-    <!-- 使用ツール選択 -->
+    <!-- 使用ツール -->
     <section class="settings-section">
-      <h3>使用ツール</h3>
-      <label><input type="checkbox" name="tool" value="outlook" checked> Outlook</label>
-      <label><input type="checkbox" name="tool" value="teams" checked> Teams</label>
-      <label><input type="checkbox" name="tool" value="slack" checked> Slack</label>
+      <h3>🔌 使用ツール</h3>
+      <div class="tool-checks">
+        <label class="tool-check-item"><input type="checkbox" name="tool" value="outlook" checked> 📧 Outlook</label>
+        <label class="tool-check-item"><input type="checkbox" name="tool" value="teams" checked> 💬 Teams</label>
+        <label class="tool-check-item"><input type="checkbox" name="tool" value="slack" checked> 🟢 Slack</label>
+      </div>
     </section>
 
-    <!-- 認証情報 -->
+    <!-- Microsoft認証 -->
     <section class="settings-section">
-      <h3>Microsoft 認証情報</h3>
-      <label>Client ID<input type="text" id="azure-client-id" placeholder="Azure Client ID"></label>
-      <label>Client Secret<input type="password" id="azure-client-secret" placeholder="Azure Client Secret"></label>
-      <label>Tenant ID<input type="text" id="azure-tenant-id" placeholder="Azure Tenant ID"></label>
+      <h3>🔑 Microsoft 認証情報（Outlook / Teams）</h3>
+      <div class="form-row">
+        <label class="form-label">Azure Client ID</label>
+        <input type="text" id="azure-client-id" class="form-input" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+      </div>
+      <div class="form-row">
+        <label class="form-label">Azure Client Secret</label>
+        <input type="password" id="azure-client-secret" class="form-input" placeholder="••••••••••••••••">
+      </div>
+      <div class="form-row">
+        <label class="form-label">Azure Tenant ID</label>
+        <input type="text" id="azure-tenant-id" class="form-input" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+      </div>
     </section>
 
+    <!-- Slack認証 -->
     <section class="settings-section">
-      <h3>Slack 認証情報</h3>
-      <label>Bot Token<input type="password" id="slack-bot-token" placeholder="xoxb-..."></label>
-      <label>Team ID<input type="text" id="slack-team-id" placeholder="T..."></label>
+      <h3>🟢 Slack 認証情報</h3>
+      <div class="form-row">
+        <label class="form-label">Bot Token</label>
+        <input type="password" id="slack-bot-token" class="form-input" placeholder="xoxb-••••••••••••">
+      </div>
+      <div class="form-row">
+        <label class="form-label">Team ID</label>
+        <input type="text" id="slack-team-id" class="form-input" placeholder="T0123456789">
+      </div>
     </section>
 
-    <!-- カスタムキーワード -->
+    <!-- タスク検出キーワード -->
     <section class="settings-section">
-      <h3>タスク検出キーワード</h3>
-      <div id="keyword-list"></div>
-      <input type="text" id="new-keyword" placeholder="キーワードを追加...">
-      <button id="btn-add-keyword">追加</button>
+      <h3>🔍 タスク検出キーワード</h3>
+      <div id="keyword-area" class="keyword-area"></div>
+      <div class="keyword-input-row">
+        <input type="text" id="new-keyword" class="form-input" placeholder="キーワードを追加（例：ご対応）">
+        <button id="btn-add-keyword" class="btn-add">＋ 追加</button>
+      </div>
     </section>
 
     <!-- 同期間隔 -->
     <section class="settings-section">
-      <h3>同期間隔</h3>
-      <select id="sync-interval">
-        <option value="1">1分</option>
-        <option value="3">3分</option>
-        <option value="5" selected>5分</option>
-        <option value="10">10分</option>
-      </select>
+      <h3>⏱️ 同期間隔</h3>
+      <div class="form-row">
+        <label class="form-label">自動同期の間隔</label>
+        <select id="sync-interval" class="form-input" style="width:auto">
+          <option value="1">1分ごと</option>
+          <option value="3">3分ごと</option>
+          <option value="5" selected>5分ごと</option>
+          <option value="10">10分ごと</option>
+          <option value="30">30分ごと</option>
+        </select>
+      </div>
     </section>
 
-    <button id="btn-save" class="btn-primary">保存</button>
-  </main>
+    <!-- 保存ボタン -->
+    <div class="save-bar">
+      <button id="btn-save" class="btn-save">💾 設定を保存</button>
+    </div>
+
+  </div>
 
   <script src="../assets/js/api.js"></script>
   <script src="../assets/js/settings.js"></script>

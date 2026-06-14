@@ -7,49 +7,125 @@
   <link rel="stylesheet" href="../assets/css/main.css">
 </head>
 <body>
+
   <header class="app-header">
     <div class="header-left">
-      <span class="app-title">📋 Task Dashbord</span>
+      <span class="app-logo">📋</span>
+      <span class="app-title">Task Dashbord</span>
+    </div>
+    <div class="header-center">
+      <span id="clock" class="clock"></span>
     </div>
     <div class="header-right">
       <span id="sync-status" class="sync-status">最終同期: 未同期</span>
-      <button id="btn-sync" class="btn-sync">🔄 今すぐ同期</button>
-      <button id="btn-settings" class="btn-settings">⚙️ 設定</button>
+      <button id="btn-sync" class="btn-icon-label" title="今すぐ同期">
+        <span class="btn-icon">🔄</span><span>同期</span>
+      </button>
+      <button id="btn-settings" class="btn-icon-label" title="設定">
+        <span class="btn-icon">⚙️</span><span>設定</span>
+      </button>
     </div>
   </header>
 
   <main class="dashboard-layout">
-    <!-- タスクエリア（左70%） -->
+
+    <!-- ===== タスクエリア ===== -->
     <section class="task-section">
-      <div class="section-header">
-        <h2>タスク一覧</h2>
-        <div class="filter-bar">
-          <button class="filter-btn active" data-priority="all">すべて</button>
-          <button class="filter-btn high" data-priority="high">🔴 高</button>
-          <button class="filter-btn medium" data-priority="medium">🟡 中</button>
-          <button class="filter-btn low" data-priority="low">🟢 低</button>
+
+      <!-- サマリーバー -->
+      <div class="summary-bar">
+        <div class="summary-card high">
+          <span class="summary-count" id="count-high">0</span>
+          <span class="summary-label">高優先</span>
+        </div>
+        <div class="summary-card medium">
+          <span class="summary-count" id="count-medium">0</span>
+          <span class="summary-label">中優先</span>
+        </div>
+        <div class="summary-card low">
+          <span class="summary-count" id="count-low">0</span>
+          <span class="summary-label">低優先</span>
+        </div>
+        <div class="summary-card done-card">
+          <span class="summary-count" id="count-done">0</span>
+          <span class="summary-label">完了済み</span>
         </div>
       </div>
-      <div id="task-list" class="task-list">
-        <p class="empty-message">同期中...</p>
+
+      <!-- フィルターバー -->
+      <div class="filter-area">
+        <!-- 優先度フィルター -->
+        <div class="filter-group">
+          <span class="filter-label">優先度</span>
+          <div class="filter-bar" id="priority-filters">
+            <button class="filter-btn active" data-priority="all">すべて</button>
+            <button class="filter-btn" data-priority="high">🔴 高</button>
+            <button class="filter-btn" data-priority="medium">🟡 中</button>
+            <button class="filter-btn" data-priority="low">🟢 低</button>
+          </div>
+        </div>
+        <!-- ソースフィルター -->
+        <div class="filter-group">
+          <span class="filter-label">ソース</span>
+          <div class="filter-bar" id="source-filters">
+            <button class="filter-btn active" data-source="all">すべて</button>
+            <button class="filter-btn" data-source="outlook">📧 Outlook</button>
+            <button class="filter-btn" data-source="teams">💬 Teams</button>
+            <button class="filter-btn" data-source="slack">🟢 Slack</button>
+          </div>
+        </div>
+        <!-- 完了表示トグル -->
+        <label class="toggle-label">
+          <input type="checkbox" id="show-done">
+          <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          <span>完了済みを表示</span>
+        </label>
       </div>
+
+      <!-- タスクリスト -->
+      <div id="task-list" class="task-list"></div>
     </section>
 
-    <!-- ニュースエリア（右30%） -->
+    <!-- ===== ニュースエリア ===== -->
     <section class="news-section">
-      <h2>ニュース</h2>
+      <div class="news-header">
+        <h2 class="section-title">📰 ニュース</h2>
+        <span id="news-updated" class="news-updated"></span>
+      </div>
       <div class="news-tabs">
-        <button class="news-tab active" data-cat="insurance">保険</button>
-        <button class="news-tab" data-cat="ai">AI</button>
-        <button class="news-tab" data-cat="general">一般</button>
+        <button class="news-tab active" data-cat="insurance">🏢 保険</button>
+        <button class="news-tab" data-cat="ai">🤖 AI</button>
+        <button class="news-tab" data-cat="general">📰 一般</button>
       </div>
-      <div id="news-list" class="news-list">
-        <p class="empty-message">読み込み中...</p>
-      </div>
+      <div id="news-list" class="news-list"></div>
     </section>
+
   </main>
 
+  <!-- タスク詳細モーダル -->
+  <div id="task-modal" class="modal-overlay" style="display:none">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span id="modal-source-badge" class="modal-source-badge"></span>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <h3 id="modal-subject" class="modal-subject"></h3>
+      <div class="modal-meta">
+        <span id="modal-sender"></span>
+        <span id="modal-date"></span>
+        <span id="modal-priority-badge" class="priority-badge"></span>
+      </div>
+      <p id="modal-body" class="modal-body"></p>
+      <p id="modal-reason" class="modal-reason"></p>
+      <div class="modal-actions">
+        <button id="modal-open-source" class="btn-primary">元のメッセージを開く →</button>
+        <button id="modal-toggle-done" class="btn-secondary"></button>
+      </div>
+    </div>
+  </div>
+
   <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/demo-data.js"></script>
   <script src="../assets/js/dashboard.js"></script>
 </body>
 </html>
