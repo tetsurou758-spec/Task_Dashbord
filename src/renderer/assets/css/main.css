@@ -258,7 +258,24 @@ input, select { font-family: inherit; }
 .star-btn.starred { color: #f59e0b; }
 
 /* ===== スクラップブック画面 ===== */
-.scrapbook-layout { padding: 20px 24px; max-width: 900px; margin: 0 auto; }
+.scrapbook-layout {
+  display: flex; flex-direction: column;
+  height: calc(100vh - var(--header-h));
+  max-width: 900px; margin: 0 auto;
+  padding: 20px 24px 0;
+  overflow: hidden;
+}
+.scrap-list {
+  flex: 1; overflow-y: auto; padding-bottom: 20px;
+  /* スクロールバーをスリムに */
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-light) transparent;
+}
+.scrap-list::-webkit-scrollbar { width: 6px; }
+.scrap-list::-webkit-scrollbar-track { background: transparent; }
+.scrap-list::-webkit-scrollbar-thumb {
+  background: var(--primary-light); border-radius: 3px;
+}
 .scrap-tabs {
   display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap;
 }
@@ -272,7 +289,7 @@ input, select { font-family: inherit; }
 .scrap-meta { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 16px; }
 .scrap-count { font-weight: 600; }
 
-.scrap-list { display: flex; flex-direction: column; gap: 10px; }
+.scrap-list { display: flex; flex-direction: column; gap: 10px; padding-right: 4px; }
 
 .scrap-group { margin-bottom: 24px; }
 .scrap-group-header {
