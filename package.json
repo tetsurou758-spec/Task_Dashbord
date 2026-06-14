@@ -1,0 +1,30 @@
+{
+  "name": "task-dashbord",
+  "version": "0.1.0",
+  "description": "個人向けタスク統合ダッシュボード（Outlook / Teams / Slack）",
+  "main": "src/main/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "backend": "python backend/app.py",
+    "build": "electron-builder"
+  },
+  "dependencies": {
+    "electron": "^30.0.0"
+  },
+  "devDependencies": {
+    "electron-builder": "^24.0.0"
+  },
+  "build": {
+    "appId": "com.tetsurou.task-dashbord",
+    "productName": "Task Dashbord",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis"
+    }
+  },
+  "author": "tetsurou758",
+  "license": "MIT"
+}

@@ -1,0 +1,131 @@
+/* ===== リセット・変数 ===== */
+:root {
+  --primary: #1a1a2e;
+  --accent: #e94560;
+  --bg: #f4f6f9;
+  --card-bg: #ffffff;
+  --text: #2d2d2d;
+  --text-muted: #888;
+  --border: #e0e0e0;
+  --high: #e53935;
+  --medium: #f9a825;
+  --low: #43a047;
+  --shadow: 0 2px 8px rgba(0,0,0,0.08);
+  --radius: 8px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', 'Yu Gothic UI', sans-serif; background: var(--bg); color: var(--text); }
+
+/* ===== ヘッダー ===== */
+.app-header {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--primary); color: #fff;
+  padding: 0 20px; height: 52px; position: sticky; top: 0; z-index: 100;
+}
+.app-title { font-size: 1.1rem; font-weight: 700; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.sync-status { font-size: 0.8rem; color: #aaa; }
+.btn-sync, .btn-settings {
+  background: rgba(255,255,255,0.12); color: #fff;
+  border: 1px solid rgba(255,255,255,0.25); border-radius: 6px;
+  padding: 5px 12px; cursor: pointer; font-size: 0.85rem;
+}
+.btn-sync:hover, .btn-settings:hover { background: rgba(255,255,255,0.22); }
+.btn-back {
+  background: none; color: #fff; border: none; cursor: pointer;
+  font-size: 0.9rem; margin-right: 8px;
+}
+
+/* ===== ダッシュボードレイアウト ===== */
+.dashboard-layout {
+  display: grid; grid-template-columns: 1fr 320px;
+  gap: 16px; padding: 16px; height: calc(100vh - 52px); overflow: hidden;
+}
+
+/* ===== タスクセクション ===== */
+.task-section { display: flex; flex-direction: column; overflow: hidden; }
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.section-header h2 { font-size: 1rem; font-weight: 700; }
+
+.filter-bar { display: flex; gap: 6px; }
+.filter-btn {
+  padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border);
+  background: #fff; cursor: pointer; font-size: 0.8rem;
+}
+.filter-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.filter-btn.high.active { background: var(--high); border-color: var(--high); }
+.filter-btn.medium.active { background: var(--medium); border-color: var(--medium); }
+.filter-btn.low.active { background: var(--low); border-color: var(--low); }
+
+.task-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+
+/* ===== タスクカード ===== */
+.task-card {
+  background: var(--card-bg); border-radius: var(--radius);
+  border-left: 4px solid var(--border); padding: 12px 14px;
+  box-shadow: var(--shadow); cursor: pointer; transition: transform 0.1s;
+}
+.task-card:hover { transform: translateX(2px); }
+.task-card[data-priority="high"] { border-left-color: var(--high); }
+.task-card[data-priority="medium"] { border-left-color: var(--medium); }
+.task-card[data-priority="low"] { border-left-color: var(--low); }
+.task-card.done { opacity: 0.5; }
+
+.task-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.task-subject { font-weight: 600; font-size: 0.9rem; flex: 1; }
+.task-source-badge {
+  font-size: 0.7rem; padding: 2px 7px; border-radius: 10px;
+  background: var(--bg); border: 1px solid var(--border); white-space: nowrap;
+}
+.task-meta { display: flex; gap: 12px; margin-top: 4px; font-size: 0.78rem; color: var(--text-muted); }
+.task-body { font-size: 0.82rem; color: var(--text-muted); margin-top: 6px; line-height: 1.4; }
+.priority-badge {
+  font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; color: #fff;
+}
+.priority-badge.high { background: var(--high); }
+.priority-badge.medium { background: var(--medium); }
+.priority-badge.low { background: var(--low); }
+
+/* ===== ニュースセクション ===== */
+.news-section { display: flex; flex-direction: column; overflow: hidden; }
+.news-section h2 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+.news-tabs { display: flex; gap: 4px; margin-bottom: 8px; }
+.news-tab {
+  flex: 1; padding: 5px; border: 1px solid var(--border);
+  border-radius: 6px; background: #fff; cursor: pointer; font-size: 0.8rem;
+}
+.news-tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.news-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+.news-card {
+  background: var(--card-bg); border-radius: var(--radius);
+  padding: 10px 12px; box-shadow: var(--shadow); cursor: pointer;
+}
+.news-card:hover { background: #f0f4ff; }
+.news-title { font-size: 0.82rem; font-weight: 600; line-height: 1.4; }
+.news-source { font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; }
+
+/* ===== 設定画面 ===== */
+.settings-layout { max-width: 600px; margin: 24px auto; padding: 0 16px; display: flex; flex-direction: column; gap: 16px; }
+.settings-section {
+  background: var(--card-bg); border-radius: var(--radius);
+  padding: 16px; box-shadow: var(--shadow);
+}
+.settings-section h3 { font-size: 0.95rem; margin-bottom: 12px; color: var(--primary); }
+.settings-section label {
+  display: flex; flex-direction: column; gap: 4px;
+  font-size: 0.85rem; margin-bottom: 10px;
+}
+.settings-section input[type="text"],
+.settings-section input[type="password"],
+.settings-section select {
+  padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem;
+}
+.btn-primary {
+  background: var(--accent); color: #fff; border: none; border-radius: 8px;
+  padding: 10px 24px; font-size: 0.95rem; cursor: pointer; font-weight: 600;
+}
+.btn-primary:hover { opacity: 0.88; }
+
+/* ===== 共通 ===== */
+.empty-message { color: var(--text-muted); font-size: 0.85rem; text-align: center; margin-top: 40px; }

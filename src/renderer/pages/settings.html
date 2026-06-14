@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>設定 - Task Dashbord</title>
+  <link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-left">
+      <button class="btn-back" onclick="history.back()">← 戻る</button>
+      <span class="app-title">⚙️ 設定</span>
+    </div>
+  </header>
+
+  <main class="settings-layout">
+
+    <!-- 使用ツール選択 -->
+    <section class="settings-section">
+      <h3>使用ツール</h3>
+      <label><input type="checkbox" name="tool" value="outlook" checked> Outlook</label>
+      <label><input type="checkbox" name="tool" value="teams" checked> Teams</label>
+      <label><input type="checkbox" name="tool" value="slack" checked> Slack</label>
+    </section>
+
+    <!-- 認証情報 -->
+    <section class="settings-section">
+      <h3>Microsoft 認証情報</h3>
+      <label>Client ID<input type="text" id="azure-client-id" placeholder="Azure Client ID"></label>
+      <label>Client Secret<input type="password" id="azure-client-secret" placeholder="Azure Client Secret"></label>
+      <label>Tenant ID<input type="text" id="azure-tenant-id" placeholder="Azure Tenant ID"></label>
+    </section>
+
+    <section class="settings-section">
+      <h3>Slack 認証情報</h3>
+      <label>Bot Token<input type="password" id="slack-bot-token" placeholder="xoxb-..."></label>
+      <label>Team ID<input type="text" id="slack-team-id" placeholder="T..."></label>
+    </section>
+
+    <!-- カスタムキーワード -->
+    <section class="settings-section">
+      <h3>タスク検出キーワード</h3>
+      <div id="keyword-list"></div>
+      <input type="text" id="new-keyword" placeholder="キーワードを追加...">
+      <button id="btn-add-keyword">追加</button>
+    </section>
+
+    <!-- 同期間隔 -->
+    <section class="settings-section">
+      <h3>同期間隔</h3>
+      <select id="sync-interval">
+        <option value="1">1分</option>
+        <option value="3">3分</option>
+        <option value="5" selected>5分</option>
+        <option value="10">10分</option>
+      </select>
+    </section>
+
+    <button id="btn-save" class="btn-primary">保存</button>
+  </main>
+
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/settings.js"></script>
+</body>
+</html>

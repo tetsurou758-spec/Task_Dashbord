@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Dashbord</title>
+  <link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-left">
+      <span class="app-title">📋 Task Dashbord</span>
+    </div>
+    <div class="header-right">
+      <span id="sync-status" class="sync-status">最終同期: 未同期</span>
+      <button id="btn-sync" class="btn-sync">🔄 今すぐ同期</button>
+      <button id="btn-settings" class="btn-settings">⚙️ 設定</button>
+    </div>
+  </header>
+
+  <main class="dashboard-layout">
+    <!-- タスクエリア（左70%） -->
+    <section class="task-section">
+      <div class="section-header">
+        <h2>タスク一覧</h2>
+        <div class="filter-bar">
+          <button class="filter-btn active" data-priority="all">すべて</button>
+          <button class="filter-btn high" data-priority="high">🔴 高</button>
+          <button class="filter-btn medium" data-priority="medium">🟡 中</button>
+          <button class="filter-btn low" data-priority="low">🟢 低</button>
+        </div>
+      </div>
+      <div id="task-list" class="task-list">
+        <p class="empty-message">同期中...</p>
+      </div>
+    </section>
+
+    <!-- ニュースエリア（右30%） -->
+    <section class="news-section">
+      <h2>ニュース</h2>
+      <div class="news-tabs">
+        <button class="news-tab active" data-cat="insurance">保険</button>
+        <button class="news-tab" data-cat="ai">AI</button>
+        <button class="news-tab" data-cat="general">一般</button>
+      </div>
+      <div id="news-list" class="news-list">
+        <p class="empty-message">読み込み中...</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/dashboard.js"></script>
+</body>
+</html>
