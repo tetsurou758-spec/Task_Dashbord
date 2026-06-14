@@ -292,12 +292,23 @@ input, select { font-family: inherit; }
   border-radius: 10px; background: var(--primary); color: #fff;
 }
 .scrap-saved-at { font-size: 0.72rem; color: var(--text-muted); flex: 1; }
+.scrap-card-actions { display: flex; align-items: center; gap: 6px; }
 .scrap-remove-btn {
   background: none; border: 1px solid var(--border); border-radius: 12px;
   padding: 2px 10px; font-size: 0.72rem; color: #f59e0b;
   cursor: pointer; transition: all 0.15s;
 }
 .scrap-remove-btn:hover { background: #fff9f0; border-color: #f59e0b; }
+.scrap-html-btn {
+  background: none; border: 1px solid #43a047; border-radius: 12px;
+  padding: 2px 10px; font-size: 0.72rem; color: #43a047;
+  cursor: pointer; transition: all 0.15s;
+}
+.scrap-html-btn:hover { background: #f0fff2; }
+.scrap-html-btn--none {
+  border-color: var(--border); color: var(--text-muted); cursor: default;
+}
+.scrap-html-btn--none:hover { background: none; }
 
 .scrap-card-body { cursor: pointer; }
 .scrap-card-body:hover .scrap-title { color: var(--accent); text-decoration: underline; }

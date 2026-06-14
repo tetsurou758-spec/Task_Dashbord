@@ -153,14 +153,32 @@ function renderNews(items) {
     `;
   }).join('');
 
-  // ☆ボタン
+  // ☆ボタン（スクラップ登録＋HTMLローカル保存）
   list.querySelectorAll('.star-btn').forEach(btn => {
-    btn.addEventListener('click', e => {
+    btn.addEventListener('click', async e => {
       e.stopPropagation();
       const n = currentNewsItems[+btn.dataset.newsIdx];
       const saved = window.scrapbook.toggleScrap({ ...n, category: currentNewsCategory });
       btn.textContent = saved ? '★' : '☆';
       btn.classList.toggle('starred', saved);
+
+      if (saved && window.electronAPI) {
+        // バックグラウンドでHTMLを取得・保存（失敗しても★は維持）
+        btn.title = 'HTMLを保存中...';
+        const result = await window.electronAPI.saveArticleHtml(n.url, n.title);
+        if (result.ok) {
+          // html_pathをスクラップデータに紐付けて保存
+          window.scrapbook.updateHtmlPath(n.url, result.filepath);
+          btn.title = 'HTMLを保存しました';
+        } else {
+          btn.title = 'スクラップ済み（HTML取得失敗）';
+        }
+      } else if (!saved && window.electronAPI) {
+        // ★解除時にローカルHTMLも削除
+        const filepath = window.scrapbook.getHtmlPath(n.url);
+        if (filepath) window.electronAPI.deleteArticleHtml(filepath);
+        btn.title = 'スクラップに追加';
+      }
     });
   });
 

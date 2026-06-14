@@ -69,25 +69,43 @@ function renderScraps() {
   list.querySelectorAll('[data-remove-url]').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
+      // ローカルHTMLも削除
+      const filepath = window.scrapbook.getHtmlPath(btn.dataset.removeUrl);
+      if (filepath && window.electronAPI) window.electronAPI.deleteArticleHtml(filepath);
       window.scrapbook.removeScrap(btn.dataset.removeUrl);
       renderScraps();
     });
   });
 
-  // カード本体クリックで元記事を開く
+  // 保存済みHTMLを開くボタン
+  list.querySelectorAll('[data-open-local]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      if (window.electronAPI) window.electronAPI.openLocalHtml(btn.dataset.openLocal);
+    });
+  });
+
+  // カード本体クリックで元記事を開く（URLが生きていれば外部ブラウザへ）
   list.querySelectorAll('[data-open-url]').forEach(el => {
     el.addEventListener('click', () => openSource(el.dataset.openUrl));
   });
 }
 
 function scrapCardHTML(s) {
-  const safeUrl = encodeURIComponent(s.url);
+  const hasHtml = s.html_path ? true : false;
+  const htmlBtnAttr = hasHtml ? `data-open-local="${s.html_path}"` : 'disabled';
+  const htmlBtnClass = hasHtml ? 'scrap-html-btn' : 'scrap-html-btn scrap-html-btn--none';
+  const htmlBtnTitle = hasHtml ? '保存済みHTMLを開く' : 'HTML未保存';
+  const htmlBtnText = hasHtml ? '💾 HTML' : '💾 未保存';
   return `
     <div class="scrap-card">
       <div class="scrap-card-header">
         <span class="scrap-cat-badge">${CAT_LABELS[s.category] || s.category}</span>
         <span class="scrap-saved-at">${formatSavedAt(s.saved_at)}</span>
-        <button class="scrap-remove-btn" data-remove-url="${s.url}" title="削除">★ 解除</button>
+        <div class="scrap-card-actions">
+          <button class="${htmlBtnClass}" ${htmlBtnAttr} title="${htmlBtnTitle}">${htmlBtnText}</button>
+          <button class="scrap-remove-btn" data-remove-url="${s.url}" title="削除">★ 解除</button>
+        </div>
       </div>
       <div class="scrap-card-body" data-open-url="${s.url}">
         <div class="scrap-title">${s.title}</div>

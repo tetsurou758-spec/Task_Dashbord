@@ -32,4 +32,20 @@ function toggleScrap(article) {
   else { addScrap(article); return true; }
 }
 
-window.scrapbook = { getScraps, isScraped, addScrap, removeScrap, toggleScrap };
+// スクラップにhtml_pathを紐付け（HTML保存完了後に呼び出す）
+function updateHtmlPath(url, filepath) {
+  const scraps = getScraps();
+  const item = scraps.find(s => s.url === url);
+  if (item) {
+    item.html_path = filepath;
+    saveScraps(scraps);
+  }
+}
+
+// html_pathを取得
+function getHtmlPath(url) {
+  const item = getScraps().find(s => s.url === url);
+  return item ? (item.html_path || null) : null;
+}
+
+window.scrapbook = { getScraps, isScraped, addScrap, removeScrap, toggleScrap, updateHtmlPath, getHtmlPath };
