@@ -277,9 +277,14 @@ ipcMain.handle('fetch-article-text', async (_, url) => {
       return { ok: true, text, method: 'heuristic' };
     }
 
-    return { ok: false, error: `本文取得不可（${text.length}文字）: ログイン必須またはJS描画ページの可能性` };
+    // エラー種別を分類
+    const reason = /ログイン|会員|login|subscribe|paywall/i.test(text) ? 'paywall'
+                 : text.length === 0 ? 'empty' : 'short';
+    return { ok: false, reason, error: `本文取得不可（${text.length}文字）` };
   } catch (err) {
-    return { ok: false, error: err.message };
+    const reason = /400|403|blocked/i.test(err.message) ? 'blocked'
+                 : /timeout/i.test(err.message) ? 'timeout' : 'error';
+    return { ok: false, reason, error: err.message };
   }
 });
 

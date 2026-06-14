@@ -370,7 +370,18 @@ input, select { font-family: inherit; }
 .acc-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
 .acc-text-preview, .acc-text-full { white-space: pre-wrap; word-break: break-all; }
-.acc-text-empty { color: var(--text-muted); font-style: italic; font-size: 0.78rem; }
+.acc-text-empty { color: #e57373; font-size: 0.78rem; margin-bottom: 6px; }
+.acc-text-summary {
+  margin-top: 8px; padding: 8px 10px;
+  background: #fff9f0; border-left: 3px solid #f59e0b;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 0.82rem; line-height: 1.65; color: var(--text);
+}
+.acc-summary-label {
+  display: block; font-size: 0.7rem; color: #f59e0b;
+  font-weight: 700; margin-bottom: 4px;
+}
+.acc-text-hint { font-size: 0.72rem; color: var(--text-muted); margin-top: 6px; }
 .acc-text-footer {
   display: flex; align-items: center; gap: 10px;
   margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--border);

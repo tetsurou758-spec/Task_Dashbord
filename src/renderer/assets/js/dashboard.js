@@ -169,6 +169,7 @@ function renderNews(items) {
           window.scrapbook.updateTextContent(n.url, result.text);
           btn.title = result.method === 'readability' ? '本文抽出済み（Readability）' : '本文抽出済み';
         } else {
+          window.scrapbook.updateTextError(n.url, result.reason || 'error');
           btn.title = 'スクラップ済み（本文取得失敗）';
         }
       } else if (!saved && window.electronAPI) {

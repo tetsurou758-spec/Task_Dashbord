@@ -37,10 +37,19 @@ function scrapCardHTML(s, idx) {
   const hasText = !!(s.text_content && s.text_content.trim().length > 0);
 
   // アコーディオン本文エリア
+  const ERROR_LABELS = {
+    blocked:  '⛔ Google Newsや有料サイトのURLはサーバー側でブロックされています',
+    paywall:  '🔒 有料会員限定の記事です（ログインが必要）',
+    timeout:  '⏱ 接続タイムアウト（サイトが重いか、アクセス拒否）',
+    short:    '📄 本文が短すぎるため取得できませんでした',
+    empty:    '📄 本文を取得できませんでした（JS描画ページの可能性）',
+    error:    '⚠️ 取得中にエラーが発生しました',
+  };
+
   let bodyContent;
   if (hasText) {
     const lines   = s.text_content.split('\n').filter(l => l.trim());
-    const preview = lines.slice(0, 8).map(esc).join('\n');   // 最初の8行
+    const preview = lines.slice(0, 8).map(esc).join('\n');
     const full    = lines.map(esc).join('\n');
     const hasMore = lines.length > 8;
     bodyContent = `
@@ -51,7 +60,17 @@ function scrapCardHTML(s, idx) {
         <span class="acc-text-len">${s.text_content.length.toLocaleString()} 文字</span>
       </div>`;
   } else {
-    bodyContent = `<div class="acc-text-empty">📄 テキスト未取得（☆を外して再度クリックで再試行）</div>`;
+    const errLabel = ERROR_LABELS[s.text_fetch_error] || ERROR_LABELS['error'];
+    // RSSリード文があればフォールバック表示
+    const fallback = s.summary ? `
+      <div class="acc-text-summary">
+        <span class="acc-summary-label">📰 RSSリード文</span>
+        ${esc(s.summary)}
+      </div>` : '';
+    bodyContent = `
+      <div class="acc-text-empty">${errLabel}</div>
+      ${fallback}
+      ${!s.text_fetch_error ? '<div class="acc-text-hint">☆を外して再度クリックで再試行</div>' : ''}`;
   }
 
   return `

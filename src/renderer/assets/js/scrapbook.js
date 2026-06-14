@@ -49,7 +49,14 @@ function getHtmlPath(url) {
 function updateTextContent(url, text) {
   const scraps = getScraps();
   const item = scraps.find(s => s.url === url);
-  if (item) { item.text_content = text; saveScraps(scraps); }
+  if (item) { item.text_content = text; item.text_fetch_error = null; saveScraps(scraps); }
 }
 
-window.scrapbook = { getScraps, isScraped, addScrap, removeScrap, toggleScrap, updateHtmlPath, getHtmlPath, updateTextContent };
+// テキスト取得失敗理由を保存
+function updateTextError(url, reason) {
+  const scraps = getScraps();
+  const item = scraps.find(s => s.url === url);
+  if (item) { item.text_fetch_error = reason; saveScraps(scraps); }
+}
+
+window.scrapbook = { getScraps, isScraped, addScrap, removeScrap, toggleScrap, updateHtmlPath, getHtmlPath, updateTextContent, updateTextError };
