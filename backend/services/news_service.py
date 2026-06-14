@@ -7,10 +7,9 @@ from email.utils import parsedate_to_datetime
 # カテゴリ別RSSフィード一覧
 RSS_FEEDS = {
     "insurance": [
-        {"url": "https://www.giroj.or.jp/rss/news.rss",          "source": "損保協会"},
-        {"url": "https://www.fsa.go.jp/news/rss.xml",            "source": "金融庁"},
-        {"url": "https://feeds.feedburner.com/InsuranceJournal", "source": "Insurance Journal"},
-        {"url": "https://rss.nikkei.com/rss/nkd/industry.rdf",  "source": "日本経済新聞"},
+        {"url": "https://news.google.com/rss/search?q=損害保険+生命保険&hl=ja&gl=JP&ceid=JP:ja", "source": "Google News"},
+        {"url": "https://news.google.com/rss/search?q=損保+代理店+保険業法&hl=ja&gl=JP&ceid=JP:ja", "source": "Google News"},
+        {"url": "https://www.fsa.go.jp/news/rss.xml", "source": "金融庁"},
     ],
     "ai": [
         {"url": "https://jp.techcrunch.com/feed/",               "source": "TechCrunch Japan"},
