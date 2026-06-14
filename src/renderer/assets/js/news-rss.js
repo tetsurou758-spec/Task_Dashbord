@@ -20,10 +20,10 @@ const RSS_SOURCES = {
     { url: "https://rss.asahi.com/rss/asahi/newsheadlines.rdf", source: "朝日新聞",    keywords: [] },
   ],
   itconsult: [
-    { url: "https://www.itmedia.co.jp/enterprise/subtop/features/rss.xml", source: "ITmedia エンタープライズ", keywords: ["DX", "デジタル", "クラウド", "コンサル", "システム", "IT", "SAP", "ERP", "導入"] },
-    { url: "https://japan.zdnet.com/rss/index.rdf",          source: "ZDNet Japan",     keywords: ["DX", "デジタル変革", "クラウド", "コンサル", "IT戦略", "システム", "導入", "アクセンチュア", "デロイト", "マッキンゼー"] },
-    { url: "https://www.cio.com/feed/",                      source: "CIO",             keywords: ["consulting", "digital", "transformation", "cloud", "ERP", "strategy"] },
-    { url: "https://rss.nikkei.com/rss/nkd/news.rdf",       source: "日本経済新聞",    keywords: ["DX", "デジタル変革", "ITコンサル", "システム導入", "アクセンチュア", "デロイト", "フジitec", "NTTデータ", "富士通"] },
+    { url: "https://www.itmedia.co.jp/enterprise/subtop/features/rss.xml", source: "ITmedia エンタープライズ", keywords: ["DX", "デジタル", "クラウド", "コンサル", "システム", "SAP", "ERP", "導入", "IT"] },
+    { url: "https://japan.zdnet.com/rss/index.rdf",          source: "ZDNet Japan",     keywords: ["DX", "デジタル変革", "クラウド", "コンサル", "IT戦略", "システム", "導入", "アクセンチュア", "デロイト"] },
+    { url: "https://rss.itmedia.co.jp/rss/2.0/ait.xml",     source: "@IT",             keywords: ["DX", "クラウド", "システム", "開発", "導入", "IT基盤", "ERP", "SAP"] },
+    { url: "https://xtech.nikkei.com/rss/index.rdf",         source: "日経クロステック", keywords: ["DX", "デジタル変革", "ITコンサル", "システム導入", "クラウド", "NTTデータ", "富士通", "アクセンチュア"] },
   ],
 };
 

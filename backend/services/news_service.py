@@ -26,7 +26,8 @@ RSS_FEEDS = {
     "itconsult": [
         {"url": "https://www.itmedia.co.jp/enterprise/subtop/features/rss.xml", "source": "ITmedia エンタープライズ"},
         {"url": "https://japan.zdnet.com/rss/index.rdf",          "source": "ZDNet Japan"},
-        {"url": "https://rss.nikkei.com/rss/nkd/news.rdf",       "source": "日本経済新聞"},
+        {"url": "https://rss.itmedia.co.jp/rss/2.0/ait.xml",     "source": "@IT"},
+        {"url": "https://xtech.nikkei.com/rss/index.rdf",         "source": "日経クロステック"},
     ],
 }
 
