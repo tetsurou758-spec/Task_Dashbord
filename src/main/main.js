@@ -147,6 +147,37 @@ ipcMain.handle('check-html-exists', async (_, filepath) => {
   return { exists: fs.existsSync(filepath) };
 });
 
+// HTMLからテキストを抽出（タグ除去・主要コンテンツ抽出）
+function extractText(html) {
+  // scriptとstyleを除去
+  let text = html
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<noscript[\s\S]*?<\/noscript>/gi, '')
+    .replace(/<!--[\s\S]*?-->/g, '');
+  // タグを除去してテキスト取得
+  text = text.replace(/<[^>]+>/g, ' ');
+  // HTMLエンティティを変換
+  text = text
+    .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+  // 連続する空白・改行を整理
+  text = text.replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+  return text;
+}
+
+// IPC: 記事のテキスト全文を取得して返す
+ipcMain.handle('fetch-article-text', async (_, url) => {
+  try {
+    const html = await fetchUrl(url);
+    const text = extractText(html);
+    return { ok: true, text };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+});
+
 // IPC: 元ソース（Outlook/Teams/Slack）を外部ブラウザで開く
 ipcMain.on('open-external', (_, url) => shell.openExternal(url));
 

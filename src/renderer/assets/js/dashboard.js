@@ -163,15 +163,14 @@ function renderNews(items) {
       btn.classList.toggle('starred', saved);
 
       if (saved && window.electronAPI) {
-        // バックグラウンドでHTMLを取得・保存（失敗しても★は維持）
-        btn.title = 'HTMLを保存中...';
-        const result = await window.electronAPI.saveArticleHtml(n.url, n.title);
+        // バックグラウンドでテキスト全文を取得・保存（失敗しても★は維持）
+        btn.title = 'テキストを取得中...';
+        const result = await window.electronAPI.fetchArticleText(n.url);
         if (result.ok) {
-          // html_pathをスクラップデータに紐付けて保存
-          window.scrapbook.updateHtmlPath(n.url, result.filepath);
-          btn.title = 'HTMLを保存しました';
+          window.scrapbook.updateTextContent(n.url, result.text);
+          btn.title = 'テキスト保存済み';
         } else {
-          btn.title = 'スクラップ済み（HTML取得失敗）';
+          btn.title = 'スクラップ済み（テキスト取得失敗）';
         }
       } else if (!saved && window.electronAPI) {
         // ★解除時にローカルHTMLも削除
@@ -227,14 +226,37 @@ async function loadNews() {
   renderNews(DEMO_NEWS[currentNewsCategory] || []);
 }
 
-// ===== 優先度フィルター =====
+// ===== 優先度フィルター（フィルターバーボタン） =====
 document.getElementById('priority-filters').addEventListener('click', e => {
   const btn = e.target.closest('.filter-btn');
   if (!btn) return;
-  document.querySelectorAll('#priority-filters .filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  currentPriority = btn.dataset.priority;
+  applyPriorityFilter(btn.dataset.priority);
+});
+
+// ===== 優先度フィルター適用（サマリーカードからも呼び出し） =====
+function applyPriorityFilter(priority) {
+  currentPriority = priority;
+  document.querySelectorAll('#priority-filters .filter-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.priority === priority);
+  });
   renderTasks();
+}
+
+// ===== サマリーカードクリックで絞り込み =====
+document.querySelectorAll('.summary-card').forEach(card => {
+  card.style.cursor = 'pointer';
+  card.addEventListener('click', () => {
+    const cls = card.classList;
+    const priority = cls.contains('high') ? 'high'
+                   : cls.contains('medium') ? 'medium'
+                   : cls.contains('low') ? 'low'
+                   : cls.contains('done-card') ? 'all' : 'all';
+    if (cls.contains('done-card')) {
+      document.getElementById('show-done').checked = true;
+      showDone = true;
+    }
+    applyPriorityFilter(priority);
+  });
 });
 
 // ===== ソースフィルター =====

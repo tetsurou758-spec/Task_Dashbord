@@ -6,6 +6,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   openExternal: (url) => ipcRenderer.send('open-external', url),
   // メインプロセス経由でRSSを取得（CORS・User-Agent制限なし）
   fetchRss: (url) => ipcRenderer.invoke('fetch-rss', url),
+  // 記事テキスト全文を取得（HTMLタグ除去済み）
+  fetchArticleText: (url) => ipcRenderer.invoke('fetch-article-text', url),
   // 記事HTMLをローカルファイルに保存
   saveArticleHtml: (url, title) => ipcRenderer.invoke('save-article-html', { url, title }),
   // 保存済みHTMLをブラウザで開く

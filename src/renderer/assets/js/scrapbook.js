@@ -36,10 +36,7 @@ function toggleScrap(article) {
 function updateHtmlPath(url, filepath) {
   const scraps = getScraps();
   const item = scraps.find(s => s.url === url);
-  if (item) {
-    item.html_path = filepath;
-    saveScraps(scraps);
-  }
+  if (item) { item.html_path = filepath; saveScraps(scraps); }
 }
 
 // html_pathを取得
@@ -48,4 +45,11 @@ function getHtmlPath(url) {
   return item ? (item.html_path || null) : null;
 }
 
-window.scrapbook = { getScraps, isScraped, addScrap, removeScrap, toggleScrap, updateHtmlPath, getHtmlPath };
+// スクラップにテキスト全文を保存
+function updateTextContent(url, text) {
+  const scraps = getScraps();
+  const item = scraps.find(s => s.url === url);
+  if (item) { item.text_content = text; saveScraps(scraps); }
+}
+
+window.scrapbook = { getScraps, isScraped, addScrap, removeScrap, toggleScrap, updateHtmlPath, getHtmlPath, updateTextContent };
