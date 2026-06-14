@@ -159,13 +159,20 @@ async function loadTasks() {
 }
 
 async function loadNews() {
+  // 段階1: バックエンドAPI
   try {
     const data = await api.getNews(currentNewsCategory);
-    const items = data.news && data.news.length > 0 ? data.news : DEMO_NEWS[currentNewsCategory];
-    renderNews(items);
-  } catch {
-    renderNews(DEMO_NEWS[currentNewsCategory] || []);
-  }
+    if (data.news && data.news.length > 0) { renderNews(data.news); return; }
+  } catch { /* 次の手段へ */ }
+
+  // 段階2: フロントエンド直接RSS取得（Electron環境でCORSなし）
+  try {
+    const items = await window.fetchNewsForCategory(currentNewsCategory);
+    if (items && items.length > 0) { renderNews(items); return; }
+  } catch { /* 次の手段へ */ }
+
+  // 段階3: デモデータ
+  renderNews(DEMO_NEWS[currentNewsCategory] || []);
 }
 
 // ===== フィルター =====
