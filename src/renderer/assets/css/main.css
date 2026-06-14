@@ -335,25 +335,52 @@ input, select { font-family: inherit; }
 }
 .scrap-save-html-btn:hover { background: #fff0f3; }
 .scrap-save-html-btn:disabled { opacity: 0.6; cursor: default; }
-.scrap-text-area {
-  margin-top: 10px; padding: 10px 12px;
-  background: #f8f9fc; border-radius: var(--radius-sm);
-  border-left: 3px solid var(--primary-light);
-  font-size: 0.82rem; line-height: 1.7; color: var(--text);
-  white-space: pre-wrap; word-break: break-all;
-}
-.scrap-text-none { color: var(--text-muted); font-style: italic; border-left-color: var(--border); }
-.scrap-text-full { white-space: pre-wrap; word-break: break-all; }
-.scrap-text-toggle {
-  display: block; margin-top: 6px; background: none; border: none;
-  color: var(--accent); font-size: 0.78rem; cursor: pointer; padding: 2px 0;
-}
-.scrap-text-toggle:hover { text-decoration: underline; }
 
-.scrap-card-body { cursor: pointer; }
-.scrap-card-body:hover .scrap-title { color: var(--accent); text-decoration: underline; }
-.scrap-title { font-size: 0.92rem; font-weight: 700; line-height: 1.5; color: var(--text); }
-.scrap-summary { font-size: 0.82rem; color: var(--text-muted); margin-top: 6px; line-height: 1.6; }
+/* タイトル・メタ */
+.scrap-card-title {
+  font-size: 0.93rem; font-weight: 700; line-height: 1.5; color: var(--text);
+  cursor: pointer; margin-top: 2px;
+}
+.scrap-card-title:hover { color: var(--accent); text-decoration: underline; }
+.scrap-card-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; margin-bottom: 8px; }
+
+/* アコーディオントリガー */
+.acc-trigger {
+  display: block; width: 100%; text-align: left;
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 5px 10px; font-size: 0.78rem; color: var(--text-muted);
+  cursor: pointer; transition: all 0.15s; margin-top: 2px;
+}
+.acc-trigger:hover { background: #e8eaf6; color: var(--primary); border-color: var(--primary-light); }
+.acc-trigger[aria-expanded="true"] { color: var(--primary); background: #eef0fb; }
+.acc-trigger-warn { color: var(--text-muted); font-size: 0.72rem; }
+
+/* アコーディオン本文 */
+.acc-body {
+  margin-top: 8px;
+  background: #f8f9fc;
+  border-left: 3px solid var(--primary-light);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 10px 12px;
+  font-size: 0.81rem; line-height: 1.75; color: var(--text);
+  max-height: 320px; overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+.acc-body::-webkit-scrollbar { width: 4px; }
+.acc-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.acc-text-preview, .acc-text-full { white-space: pre-wrap; word-break: break-all; }
+.acc-text-empty { color: var(--text-muted); font-style: italic; font-size: 0.78rem; }
+.acc-text-footer {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--border);
+}
+.acc-toggle-btn {
+  background: none; border: none; color: var(--accent);
+  font-size: 0.78rem; cursor: pointer; padding: 0;
+}
+.acc-toggle-btn:hover { text-decoration: underline; }
+.acc-text-len { font-size: 0.72rem; color: var(--text-muted); margin-left: auto; }
 .scrap-source { font-size: 0.72rem; color: var(--text-muted); margin-top: 8px; }
 
 .btn-danger { border-color: rgba(233,69,96,0.4) !important; color: var(--accent) !important; }

@@ -147,31 +147,78 @@ ipcMain.handle('check-html-exists', async (_, filepath) => {
   return { exists: fs.existsSync(filepath) };
 });
 
-// HTMLからテキストを抽出（タグ除去・主要コンテンツ抽出）
+// meta-refreshリダイレクト先URLを抽出
+function extractMetaRefreshUrl(html, baseUrl) {
+  const m = html.match(/<meta[^>]+http-equiv=["']?refresh["']?[^>]+content=["'][^"']*url=([^"'\s>]+)/i)
+         || html.match(/<meta[^>]+content=["'][^"']*url=([^"'\s>]+)[^"']*["'][^>]+http-equiv=["']?refresh["']?/i);
+  if (!m) return null;
+  const redirectUrl = m[1].replace(/['"]/g, '');
+  return redirectUrl.startsWith('http') ? redirectUrl : new URL(redirectUrl, baseUrl).href;
+}
+
+// HTMLからテキストを抽出（記事本文優先・ノイズ除去）
 function extractText(html) {
-  // scriptとstyleを除去
-  let text = html
+  // ノイズ要素を先に除去
+  let cleaned = html
     .replace(/<script[\s\S]*?<\/script>/gi, '')
     .replace(/<style[\s\S]*?<\/style>/gi, '')
     .replace(/<noscript[\s\S]*?<\/noscript>/gi, '')
+    .replace(/<nav[\s\S]*?<\/nav>/gi, '')
+    .replace(/<header[\s\S]*?<\/header>/gi, '')
+    .replace(/<footer[\s\S]*?<\/footer>/gi, '')
+    .replace(/<aside[\s\S]*?<\/aside>/gi, '')
     .replace(/<!--[\s\S]*?-->/g, '');
-  // タグを除去してテキスト取得
-  text = text.replace(/<[^>]+>/g, ' ');
+
+  // 記事本文エリアを優先抽出（<article> → <main> → class/id="article/content/entry/post"）
+  let content = cleaned;
+  const articleTag = cleaned.match(/<article[\s\S]*?<\/article>/i);
+  const mainTag    = cleaned.match(/<main[\s\S]*?<\/main>/i);
+  const contentDiv = cleaned.match(/<(?:div|section)[^>]+(?:class|id)=["'][^"']*(?:article|entry|post|content|body|text)[^"']*["'][^>]*>([\s\S]*?)<\/(?:div|section)>/i);
+  if (articleTag)   content = articleTag[0];
+  else if (mainTag) content = mainTag[0];
+  else if (contentDiv) content = contentDiv[0];
+
+  // タグを除去
+  let text = content.replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n').replace(/<[^>]+>/g, '');
+
   // HTMLエンティティを変換
   text = text
     .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"').replace(/&#39;/g, "'");
-  // 連続する空白・改行を整理
-  text = text.replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+    .replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+    .replace(/&#\d+;/g, '');
+
+  // 空白行・連続スペースを整理（ここが重要：pre-wrap向けに行数を絞る）
+  text = text
+    .split('\n')
+    .map(l => l.replace(/\s+/g, ' ').trim())
+    .filter(l => l.length > 0)
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+
   return text;
 }
 
-// IPC: 記事のテキスト全文を取得して返す
+// IPC: 記事のテキスト全文を取得して返す（meta-refreshリダイレクト対応）
 ipcMain.handle('fetch-article-text', async (_, url) => {
   try {
-    const html = await fetchUrl(url);
+    let html = await fetchUrl(url);
+
+    // meta-refreshリダイレクトの追跡（最大2回）
+    for (let i = 0; i < 2; i++) {
+      const redirectUrl = extractMetaRefreshUrl(html, url);
+      if (!redirectUrl || redirectUrl === url) break;
+      url = redirectUrl;
+      html = await fetchUrl(url);
+    }
+
     const text = extractText(html);
+
+    // コンテンツが極端に少ない場合は失敗扱い（ログインウォール・JS依存ページ等）
+    if (text.length < 80) {
+      return { ok: false, error: `コンテンツ取得不可（${text.length}文字）: ログイン必須またはJS描画ページの可能性` };
+    }
     return { ok: true, text };
   } catch (err) {
     return { ok: false, error: err.message };
