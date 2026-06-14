@@ -229,12 +229,14 @@ input, select { font-family: inherit; }
   padding-bottom: 16px;
 }
 .news-card {
-  border-radius: var(--radius-sm); padding: 10px 12px;
-  border: 1px solid var(--border); cursor: pointer;
+  border-radius: var(--radius-sm); padding: 8px 10px;
+  border: 1px solid var(--border);
   transition: background 0.12s, border-color 0.12s;
   animation: fadeInUp 0.2s ease both;
 }
 .news-card:hover { background: #f5f7ff; border-color: var(--primary); }
+.news-card-top { display: flex; gap: 6px; align-items: flex-start; }
+.news-card-body { flex: 1; cursor: pointer; }
 .news-cat-badge {
   font-size: 0.65rem; font-weight: 700; padding: 1px 6px;
   border-radius: 8px; color: #fff; background: var(--primary);
@@ -243,6 +245,68 @@ input, select { font-family: inherit; }
 .news-title { font-size: 0.82rem; font-weight: 600; line-height: 1.45; color: var(--text); }
 .news-summary { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
 .news-source { font-size: 0.7rem; color: var(--text-muted); margin-top: 5px; }
+
+/* ☆ スターボタン */
+.star-btn {
+  background: none; border: none; font-size: 1.1rem;
+  color: var(--text-muted); cursor: pointer; padding: 0 2px;
+  line-height: 1; flex-shrink: 0; transition: transform 0.15s, color 0.15s;
+}
+.star-btn:hover { transform: scale(1.3); color: #f59e0b; }
+.star-btn.starred { color: #f59e0b; }
+
+/* ===== スクラップブック画面 ===== */
+.scrapbook-layout { padding: 20px 24px; max-width: 900px; margin: 0 auto; }
+.scrap-tabs {
+  display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap;
+}
+.scrap-tab {
+  padding: 6px 14px; border: 1px solid var(--border);
+  border-radius: 20px; background: var(--card-bg);
+  font-size: 0.82rem; cursor: pointer; transition: all 0.15s;
+}
+.scrap-tab:hover { border-color: var(--primary); color: var(--primary); }
+.scrap-tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.scrap-meta { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 16px; }
+.scrap-count { font-weight: 600; }
+
+.scrap-list { display: flex; flex-direction: column; gap: 10px; }
+
+.scrap-group { margin-bottom: 24px; }
+.scrap-group-header {
+  font-size: 0.82rem; font-weight: 700; color: var(--primary);
+  padding: 6px 0; margin-bottom: 8px;
+  border-bottom: 2px solid var(--primary);
+}
+
+.scrap-card {
+  background: var(--card-bg); border-radius: var(--radius);
+  border: 1px solid var(--border); padding: 14px 16px;
+  box-shadow: var(--shadow-sm); animation: fadeInUp 0.2s ease both;
+}
+.scrap-card-header {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+}
+.scrap-cat-badge {
+  font-size: 0.7rem; font-weight: 700; padding: 2px 8px;
+  border-radius: 10px; background: var(--primary); color: #fff;
+}
+.scrap-saved-at { font-size: 0.72rem; color: var(--text-muted); flex: 1; }
+.scrap-remove-btn {
+  background: none; border: 1px solid var(--border); border-radius: 12px;
+  padding: 2px 10px; font-size: 0.72rem; color: #f59e0b;
+  cursor: pointer; transition: all 0.15s;
+}
+.scrap-remove-btn:hover { background: #fff9f0; border-color: #f59e0b; }
+
+.scrap-card-body { cursor: pointer; }
+.scrap-card-body:hover .scrap-title { color: var(--accent); text-decoration: underline; }
+.scrap-title { font-size: 0.92rem; font-weight: 700; line-height: 1.5; color: var(--text); }
+.scrap-summary { font-size: 0.82rem; color: var(--text-muted); margin-top: 6px; line-height: 1.6; }
+.scrap-source { font-size: 0.72rem; color: var(--text-muted); margin-top: 8px; }
+
+.btn-danger { border-color: rgba(233,69,96,0.4) !important; color: var(--accent) !important; }
+.btn-danger:hover { background: rgba(233,69,96,0.1) !important; }
 
 /* ===== モーダル ===== */
 .modal-overlay {

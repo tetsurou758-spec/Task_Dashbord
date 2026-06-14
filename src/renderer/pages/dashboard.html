@@ -21,6 +21,9 @@
       <button id="btn-sync" class="btn-icon-label" title="今すぐ同期">
         <span class="btn-icon">🔄</span><span>同期</span>
       </button>
+      <button id="btn-scrapbook" class="btn-icon-label" title="スクラップブック">
+        <span class="btn-icon">📌</span><span>スクラップ</span>
+      </button>
       <button id="btn-settings" class="btn-icon-label" title="設定">
         <span class="btn-icon">⚙️</span><span>設定</span>
       </button>
@@ -31,8 +34,6 @@
 
     <!-- ===== タスクエリア ===== -->
     <section class="task-section">
-
-      <!-- サマリーバー -->
       <div class="summary-bar">
         <div class="summary-card high">
           <span class="summary-count" id="count-high">0</span>
@@ -52,9 +53,7 @@
         </div>
       </div>
 
-      <!-- フィルターバー -->
       <div class="filter-area">
-        <!-- 優先度フィルター -->
         <div class="filter-group">
           <span class="filter-label">優先度</span>
           <div class="filter-bar" id="priority-filters">
@@ -64,7 +63,6 @@
             <button class="filter-btn" data-priority="low">🟢 低</button>
           </div>
         </div>
-        <!-- ソースフィルター -->
         <div class="filter-group">
           <span class="filter-label">ソース</span>
           <div class="filter-bar" id="source-filters">
@@ -74,7 +72,6 @@
             <button class="filter-btn" data-source="slack">🟢 Slack</button>
           </div>
         </div>
-        <!-- 完了表示トグル -->
         <label class="toggle-label">
           <input type="checkbox" id="show-done">
           <span class="toggle-track"><span class="toggle-thumb"></span></span>
@@ -82,7 +79,6 @@
         </label>
       </div>
 
-      <!-- タスクリスト -->
       <div id="task-list" class="task-list"></div>
     </section>
 
@@ -92,7 +88,7 @@
         <h2 class="section-title">📰 ニュース</h2>
         <span id="news-updated" class="news-updated"></span>
       </div>
-      <div class="news-tabs">
+      <div class="news-tabs" id="news-tabs-container">
         <button class="news-tab active" data-cat="insurance">🏢 保険</button>
         <button class="news-tab" data-cat="ai">🤖 AI</button>
         <button class="news-tab" data-cat="itconsult">💼 ITコンサル</button>
@@ -128,6 +124,7 @@
   <script src="../assets/js/api.js"></script>
   <script src="../assets/js/demo-data.js"></script>
   <script src="../assets/js/news-rss.js"></script>
+  <script src="../assets/js/scrapbook.js"></script>
   <script src="../assets/js/dashboard.js"></script>
 </body>
 </html>

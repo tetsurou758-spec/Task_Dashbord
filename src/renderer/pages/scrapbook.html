@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>スクラップブック - Task Dashbord</title>
+  <link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="header-left">
+      <button class="btn-icon-label" onclick="location.href='dashboard.html'">
+        <span>← ダッシュボード</span>
+      </button>
+    </div>
+    <div class="header-center">
+      <span class="app-title">📌 スクラップブック</span>
+    </div>
+    <div class="header-right">
+      <button id="btn-clear-all" class="btn-icon-label btn-danger" title="すべて削除">
+        <span>🗑️ すべて削除</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="scrapbook-layout">
+
+    <!-- カテゴリタブ -->
+    <div class="scrap-tabs" id="scrap-tabs">
+      <button class="scrap-tab active" data-cat="all">📋 すべて</button>
+      <button class="scrap-tab" data-cat="insurance">🏢 保険</button>
+      <button class="scrap-tab" data-cat="ai">🤖 AI</button>
+      <button class="scrap-tab" data-cat="itconsult">💼 ITコンサル</button>
+      <button class="scrap-tab" data-cat="general">📰 一般</button>
+    </div>
+
+    <!-- 件数表示 -->
+    <div class="scrap-meta">
+      <span id="scrap-count" class="scrap-count"></span>
+    </div>
+
+    <!-- 記事一覧 -->
+    <div id="scrap-list" class="scrap-list"></div>
+
+  </div>
+
+  <script src="../assets/js/scrapbook.js"></script>
+  <script src="../assets/js/scrapbook-page.js"></script>
+</body>
+</html>
