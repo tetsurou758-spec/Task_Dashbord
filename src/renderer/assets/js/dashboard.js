@@ -163,15 +163,21 @@ function renderNews(items) {
       btn.classList.toggle('starred', saved);
 
       if (saved && window.electronAPI) {
-        btn.title = 'テキストを取得中...';
-        const result = await window.electronAPI.fetchArticleText(n.url);
-        if (result.ok) {
-          window.scrapbook.updateTextContent(n.url, result.text);
-          const methodLabel = { jsonld: 'JSON-LD', readability: 'Readability', heuristic: '段落抽出' };
-          btn.title = `本文抽出済み（${methodLabel[result.method] || result.method}）`;
+        // Google News URLは暗号化のため本文取得をスキップ（RSSリード文をフォールバックとして使用）
+        if (n.url && n.url.includes('news.google.com')) {
+          window.scrapbook.updateTextError(n.url, 'gnews');
+          btn.title = 'スクラップ済み（Google News経由：ブラウザで全文へ）';
         } else {
-          window.scrapbook.updateTextError(n.url, result.reason || 'error');
-          btn.title = 'スクラップ済み（本文取得失敗）';
+          btn.title = 'テキストを取得中...';
+          const result = await window.electronAPI.fetchArticleText(n.url);
+          if (result.ok) {
+            window.scrapbook.updateTextContent(n.url, result.text);
+            const methodLabel = { jsonld: 'JSON-LD', readability: 'Readability', heuristic: '段落抽出' };
+            btn.title = `本文抽出済み（${methodLabel[result.method] || result.method}）`;
+          } else {
+            window.scrapbook.updateTextError(n.url, result.reason || 'error');
+            btn.title = 'スクラップ済み（本文取得失敗）';
+          }
         }
       } else if (!saved && window.electronAPI) {
         // ★解除時にローカルHTMLも削除

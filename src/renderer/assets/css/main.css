@@ -371,6 +371,22 @@ input, select { font-family: inherit; }
 
 .acc-text-preview, .acc-text-full { white-space: pre-wrap; word-break: break-all; }
 .acc-text-empty { color: #e57373; font-size: 0.78rem; margin-bottom: 6px; }
+/* Google News案内（エラーではなく仕様による情報表示） */
+.acc-text-gnews {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 10px 12px; margin-bottom: 6px;
+  background: #f0f4ff; border-left: 3px solid #5b8dee;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 0.80rem; color: #3a5cbf; line-height: 1.6;
+}
+.acc-gnews-browser-btn {
+  display: inline-block; margin-top: 4px;
+  padding: 4px 10px; border-radius: var(--radius-sm);
+  background: #5b8dee; color: #fff; font-size: 0.75rem;
+  border: none; cursor: pointer; text-decoration: none;
+  align-self: flex-start;
+}
+.acc-gnews-browser-btn:hover { background: #3a5cbf; }
 .acc-text-summary {
   margin-top: 8px; padding: 8px 10px;
   background: #fff9f0; border-left: 3px solid #f59e0b;

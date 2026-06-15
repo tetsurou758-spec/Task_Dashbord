@@ -60,6 +60,19 @@ function scrapCardHTML(s, idx) {
         ${hasMore ? `<button class="acc-toggle-btn" data-idx="${idx}">▼ 全文を表示（${lines.length}行）</button>` : ''}
         <span class="acc-text-len">${s.text_content.length.toLocaleString()} 文字</span>
       </div>`;
+  } else if (s.text_fetch_error === 'gnews') {
+    // Google News経由：エラーではなく仕様案内＋RSSリード文＋ブラウザリンク
+    const summaryHtml = s.summary ? `
+      <div class="acc-text-summary" style="margin-top:0; border-left-color:#5b8dee; background:#eef2ff;">
+        <span class="acc-summary-label" style="color:#5b8dee;">📰 RSSリード文</span>
+        ${esc(s.summary)}
+      </div>` : '';
+    bodyContent = `
+      <div class="acc-text-gnews">
+        <span>📰 Google News経由の記事です。全文はブラウザでご覧ください。</span>
+        ${summaryHtml}
+        <button class="acc-gnews-browser-btn" data-open-url="${esc(s.url)}">🌐 ブラウザで全文を読む</button>
+      </div>`;
   } else {
     const errLabel = ERROR_LABELS[s.text_fetch_error] || ERROR_LABELS['error'];
     // RSSリード文があればフォールバック表示
@@ -199,6 +212,14 @@ function bindEvents(list) {
   // タイトルクリックで元記事を開く
   list.querySelectorAll('[data-open-url]').forEach(el => {
     el.addEventListener('click', () => openSource(el.dataset.openUrl));
+  });
+
+  // Google News「ブラウザで全文を読む」ボタン
+  list.querySelectorAll('.acc-gnews-browser-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      openSource(btn.dataset.openUrl);
+    });
   });
 
   // アコーディオントリガー

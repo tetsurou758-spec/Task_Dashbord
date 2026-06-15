@@ -6,9 +6,14 @@
 
 const RSS_SOURCES = {
   insurance: [
+    // 直接RSS（実URLが取得できるため本文スクレイピング可能）
+    { url: "https://www.fsa.go.jp/news/rss.xml",                   source: "金融庁",        keywords: ["保険", "損保", "生保", "代理店", "金融"] },
+    { url: "https://prtimes.jp/rss/keyword/損害保険.rss",           source: "PR TIMES",      keywords: [] },
+    { url: "https://prtimes.jp/rss/keyword/保険代理店.rss",         source: "PR TIMES",      keywords: [] },
+    { url: "https://www.itmedia.co.jp/news/subtop/industry/rss.xml", source: "ITmedia 産業", keywords: ["保険", "損保", "生保", "フィンテック", "InsurTech"] },
+    // Google News（幅広い記事収集用・本文はブラウザ参照）
     { url: "https://news.google.com/rss/search?q=損害保険+生命保険&hl=ja&gl=JP&ceid=JP:ja", source: "Google News", keywords: [] },
     { url: "https://news.google.com/rss/search?q=損保+代理店+保険業法&hl=ja&gl=JP&ceid=JP:ja", source: "Google News", keywords: [] },
-    { url: "https://www.fsa.go.jp/news/rss.xml", source: "金融庁", keywords: ["保険", "損保", "生保", "代理店", "金融"] },
   ],
   ai: [
     { url: "https://gigazine.net/news/rss_2.0/",            source: "Gigazine",        keywords: ["AI", "人工知能", "ChatGPT", "Claude", "Gemini", "生成AI", "LLM"] },

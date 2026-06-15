@@ -331,26 +331,20 @@ ipcMain.handle('fetch-article-text', async (_, url) => {
       html = await fetchUrl(url);
     }
 
-    console.log(`[fetch-article-text] URL: ${url}`);
-    console.log(`[fetch-article-text] HTML length: ${html.length}`);
-
     // Step0: JSON-LD 構造化データから抽出（JS描画サイト・有料サイトに有効）
     const jsonLdText = extractFromJsonLd(html);
-    console.log(`[fetch-article-text] JSON-LD: ${jsonLdText ? jsonLdText.length + '文字' : 'なし'}`);
     if (jsonLdText && jsonLdText.length >= 80) {
       return { ok: true, text: jsonLdText, method: 'jsonld' };
     }
 
     // Step1: Readability.js で本文抽出（Firefoxリーダービューと同等）
     const readResult = extractWithReadability(html, url);
-    console.log(`[fetch-article-text] Readability: ${readResult ? readResult.text.length + '文字' : 'null'}`);
     if (readResult && readResult.text.length >= 80) {
       return { ok: true, text: readResult.text, method: 'readability' };
     }
 
     // Step2: 段落ベースのヒューリスティック抽出にフォールバック
     const text = extractText(html);
-    console.log(`[fetch-article-text] Heuristic: ${text.length}文字`);
     if (text.length >= 60) {
       return { ok: true, text, method: 'heuristic' };
     }
@@ -358,7 +352,6 @@ ipcMain.handle('fetch-article-text', async (_, url) => {
     // エラー種別を分類
     const reason = /ログイン|会員|login|subscribe|paywall/i.test(text + (jsonLdText || '')) ? 'paywall'
                  : text.length === 0 ? 'empty' : 'short';
-    console.log(`[fetch-article-text] 失敗: reason=${reason}, HTML先頭=${html.slice(0,200).replace(/\n/g,' ')}`);
     return { ok: false, reason, error: `本文取得不可（${text.length}文字）` };
   } catch (err) {
     const reason = /400|403|blocked/i.test(err.message) ? 'blocked'
