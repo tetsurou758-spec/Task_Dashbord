@@ -59,4 +59,17 @@ function updateTextError(url, reason) {
   if (item) { item.text_fetch_error = reason; saveScraps(scraps); }
 }
 
+// 旧エラーコード 'blocked'（Google News判定）を 'gnews' に自動移行
+(function migrateGnewsErrors() {
+  const scraps = getScraps();
+  let changed = false;
+  for (const s of scraps) {
+    if (s.text_fetch_error === 'blocked' && s.url && s.url.includes('news.google.com')) {
+      s.text_fetch_error = 'gnews';
+      changed = true;
+    }
+  }
+  if (changed) saveScraps(scraps);
+})();
+
 window.scrapbook = { getScraps, isScraped, addScrap, removeScrap, toggleScrap, updateHtmlPath, getHtmlPath, updateTextContent, updateTextError };

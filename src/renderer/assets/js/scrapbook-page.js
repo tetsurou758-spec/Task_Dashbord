@@ -38,7 +38,8 @@ function scrapCardHTML(s, idx) {
 
   // アコーディオン本文エリア
   const ERROR_LABELS = {
-    blocked:  '⛔ Google Newsや有料サイトのURLはサーバー側でブロックされています',
+    gnews:    '📰 Google News経由の記事はURL暗号化のため本文自動取得不可です（下記RSS概要をご覧ください）',
+    blocked:  '⛔ サーバー側でアクセスがブロックされています',
     paywall:  '🔒 有料会員限定の記事です（ログインが必要）',
     timeout:  '⏱ 接続タイムアウト（サイトが重いか、アクセス拒否）',
     short:    '📄 本文が短すぎるため取得できませんでした',

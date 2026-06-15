@@ -316,7 +316,8 @@ ipcMain.handle('fetch-article-text', async (_, url) => {
       if (decoded) {
         url = decoded;
       } else {
-        return { ok: false, reason: 'blocked', error: 'Google News URLのデコードに失敗' };
+        // Google NewsはURLをAES暗号化しているためデコード不可（構造的制限）
+        return { ok: false, reason: 'gnews', error: 'Google News URLは暗号化のため直接取得不可' };
       }
     }
 
