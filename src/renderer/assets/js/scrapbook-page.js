@@ -95,12 +95,15 @@ function scrapCardHTML(s, idx) {
         <span class="scrap-cat-badge">${CAT_LABELS[s.category] || s.category}</span>
         <span class="scrap-saved-at">${formatSavedAt(s.saved_at)}</span>
         <div class="scrap-card-actions">
-          <button class="scrap-save-html-btn"
-            data-save-url="${esc(s.url)}"
-            data-save-title="${esc(s.title)}"
-            title="ページHTMLをまるごとローカル保存">
-            ${hasHtml ? '💾 再保存' : '💾 丸ごと保存'}
-          </button>
+          ${s.text_fetch_error === 'gnews'
+            ? `<button class="scrap-save-html-btn" disabled title="Google News経由の記事はHTML保存不可（実記事ではないため）" style="opacity:0.4;cursor:not-allowed;">💾 保存不可</button>`
+            : `<button class="scrap-save-html-btn"
+                data-save-url="${esc(s.url)}"
+                data-save-title="${esc(s.title)}"
+                title="ページHTMLをまるごとローカル保存">
+                ${hasHtml ? '💾 再保存' : '💾 丸ごと保存'}
+              </button>`
+          }
           ${hasHtml
             ? `<button class="scrap-html-btn" data-open-local="${esc(s.html_path)}" title="保存済みHTMLを開く">🌐 HTMLを開く</button>`
             : `<button class="scrap-html-btn scrap-html-btn--none" disabled title="HTML未保存">🌐 HTML未保存</button>`}
