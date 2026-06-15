@@ -229,10 +229,42 @@ function extractText(html) {
     .trim();
 }
 
+// JSON-LD 構造化データから記事本文を抽出（JS描画サイト対策・SEO必須埋め込み）
+function extractFromJsonLd(html) {
+  const results = [];
+  const scriptReg = /<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+  let m;
+  while ((m = scriptReg.exec(html)) !== null) {
+    try {
+      const data = JSON.parse(m[1]);
+      // 配列・単一オブジェクト両対応
+      const items = Array.isArray(data) ? data : [data];
+      for (const item of items) {
+        // NewsArticle / Article / BlogPosting 等
+        const body = item.articleBody || item.description || item.text || '';
+        if (body && body.length >= 80) {
+          results.push(body.replace(/\s+/g, ' ').trim());
+        }
+        // @graph 配列内にネストされている場合
+        if (Array.isArray(item['@graph'])) {
+          for (const g of item['@graph']) {
+            const gb = g.articleBody || g.description || '';
+            if (gb && gb.length >= 80) results.push(gb.replace(/\s+/g, ' ').trim());
+          }
+        }
+      }
+    } catch { /* JSON parse失敗はスキップ */ }
+  }
+  return results.length ? results.join('\n\n') : null;
+}
+
 // Readability.js で記事本文を抽出（Firefoxリーダービューと同アルゴリズム）
 function extractWithReadability(html, url) {
   try {
-    const dom = new JSDOM(html, { url });
+    // VirtualConsole でCSSパースエラー等の警告を抑制（jsdom v20 の CSS未対応構文対策）
+    const { VirtualConsole } = require('jsdom');
+    const vc = new VirtualConsole();
+    const dom = new JSDOM(html, { url, virtualConsole: vc });
     const reader = new Readability(dom.window.document);
     const article = reader.parse();
     if (!article || !article.textContent) return null;
@@ -265,6 +297,12 @@ ipcMain.handle('fetch-article-text', async (_, url) => {
       html = await fetchUrl(url);
     }
 
+    // Step0: JSON-LD 構造化データから抽出（JS描画サイト・有料サイトに有効）
+    const jsonLdText = extractFromJsonLd(html);
+    if (jsonLdText && jsonLdText.length >= 80) {
+      return { ok: true, text: jsonLdText, method: 'jsonld' };
+    }
+
     // Step1: Readability.js で本文抽出（Firefoxリーダービューと同等）
     const readResult = extractWithReadability(html, url);
     if (readResult && readResult.text.length >= 80) {
@@ -278,7 +316,7 @@ ipcMain.handle('fetch-article-text', async (_, url) => {
     }
 
     // エラー種別を分類
-    const reason = /ログイン|会員|login|subscribe|paywall/i.test(text) ? 'paywall'
+    const reason = /ログイン|会員|login|subscribe|paywall/i.test(text + (jsonLdText || '')) ? 'paywall'
                  : text.length === 0 ? 'empty' : 'short';
     return { ok: false, reason, error: `本文取得不可（${text.length}文字）` };
   } catch (err) {

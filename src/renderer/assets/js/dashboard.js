@@ -167,7 +167,8 @@ function renderNews(items) {
         const result = await window.electronAPI.fetchArticleText(n.url);
         if (result.ok) {
           window.scrapbook.updateTextContent(n.url, result.text);
-          btn.title = result.method === 'readability' ? '本文抽出済み（Readability）' : '本文抽出済み';
+          const methodLabel = { jsonld: 'JSON-LD', readability: 'Readability', heuristic: '段落抽出' };
+          btn.title = `本文抽出済み（${methodLabel[result.method] || result.method}）`;
         } else {
           window.scrapbook.updateTextError(n.url, result.reason || 'error');
           btn.title = 'スクラップ済み（本文取得失敗）';
