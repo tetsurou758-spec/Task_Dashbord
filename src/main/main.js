@@ -112,11 +112,13 @@ ipcMain.handle('save-article-html', async (_, { url, title }) => {
     const filename = urlToFilename(url);
     const filepath = path.join(dir, filename);
 
+    // <meta http-equiv="refresh"> を除去（ローカル保存時にリダイレクト警告が出るため）
+    const cleaned = html.replace(/<meta[^>]+http-equiv=["']?refresh["']?[^>]*\/?>/gi, '');
     // <base>タグを追加して相対リンクを元URLに向ける
     const baseTag = `<base href="${url}">`;
-    const enriched = html.includes('<head>')
-      ? html.replace('<head>', `<head>${baseTag}`)
-      : `<head>${baseTag}</head>${html}`;
+    const enriched = cleaned.includes('<head>')
+      ? cleaned.replace('<head>', `<head>${baseTag}`)
+      : `<head>${baseTag}</head>${cleaned}`;
 
     fs.writeFileSync(filepath, enriched, 'utf8');
     return { ok: true, filepath };

@@ -21,8 +21,8 @@ const RSS_SOURCES = {
     { url: "https://www.itmedia.co.jp/news/subtop/aiplus/index.rdf", source: "ITmedia AI+", keywords: ["AI", "人工知能", "機械学習"] },
   ],
   general: [
-    { url: "https://www3.nhk.or.jp/rss/news/cat0.xml",      source: "NHK",             keywords: [] },
-    { url: "https://rss.asahi.com/rss/asahi/newsheadlines.rdf", source: "朝日新聞",    keywords: [] },
+    { url: "https://www3.nhk.or.jp/rss/news/cat0.xml",         source: "NHK",    keywords: [] },
+    { url: "https://www.nikkei.com/rss/index.rdf",              source: "日経新聞", keywords: [] },
   ],
   itconsult: [
     { url: "https://www.itmedia.co.jp/enterprise/subtop/features/rss.xml", source: "ITmedia エンタープライズ", keywords: ["DX", "デジタル", "クラウド", "コンサル", "システム", "SAP", "ERP", "導入", "IT"] },
@@ -121,12 +121,12 @@ async function fetchNewsForCategory(category) {
     }
   }));
 
-  // 日時降順・重複URL除去
+  // 日時降順・重複URL除去（最大20件）
   const seen = new Set();
   return allItems
     .filter(n => { if (seen.has(n.url)) return false; seen.add(n.url); return true; })
     .sort((a, b) => new Date(b.published_at) - new Date(a.published_at))
-    .slice(0, 12);
+    .slice(0, 20);
 }
 
 // グローバルに公開
