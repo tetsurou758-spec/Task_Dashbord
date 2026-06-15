@@ -270,12 +270,22 @@ document.getElementById('scrap-tabs').addEventListener('click', e => {
 });
 
 // ===== すべて削除 =====
-document.getElementById('btn-clear-all').addEventListener('click', () => {
+document.getElementById('btn-clear-all').addEventListener('click', async () => {
   const all = window.scrapbook.getScraps();
   const filtered = currentCat === 'all' ? all : all.filter(s => s.category === currentCat);
   if (filtered.length === 0) return;
   const label = currentCat === 'all' ? 'すべて' : CAT_LABELS[currentCat];
-  if (!confirm(`「${label}」の ${filtered.length} 件を削除しますか？`)) return;
+  if (!confirm(`「${label}」の ${filtered.length} 件を削除しますか？\n（丸ごと保存済みのHTMLファイルも削除されます）`)) return;
+
+  // 丸ごと保存済みHTMLファイルを削除
+  if (window.electronAPI) {
+    for (const s of filtered) {
+      if (s.html_path) {
+        await window.electronAPI.deleteArticleHtml(s.html_path);
+      }
+    }
+  }
+
   if (currentCat === 'all') {
     localStorage.removeItem('task_dashbord_scraps');
   } else {
