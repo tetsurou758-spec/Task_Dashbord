@@ -62,9 +62,18 @@ async function fetchRssDirect(url) {
       // Google News RSSはリダイレクトURL → descriptionの<a href>から実記事URLを抽出
       let articleUrl = rawUrl;
       if (rawUrl.includes('news.google.com')) {
-        const hrefMatch = desc.match(/href=["']([^"']+)["']/i);
-        if (hrefMatch && hrefMatch[1] && !hrefMatch[1].includes('news.google.com')) {
-          articleUrl = hrefMatch[1];
+        // DOMParserでdescriptionをHTMLとして解析（&amp;等のエンティティも正しく処理）
+        try {
+          const descDoc = new DOMParser().parseFromString(desc, 'text/html');
+          const links = [...descDoc.querySelectorAll('a[href]')];
+          const realLink = links.find(a => !a.href.includes('news.google.com') && a.href.startsWith('http'));
+          if (realLink) {
+            articleUrl = realLink.href;
+          } else {
+            console.warn('[RSS] Google News: desc内に実URLなし. rawUrl:', rawUrl, 'desc先頭:', desc.slice(0, 200));
+          }
+        } catch(e) {
+          console.warn('[RSS] desc parse error:', e.message);
         }
       }
 
