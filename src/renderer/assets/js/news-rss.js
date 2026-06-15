@@ -21,8 +21,8 @@ const RSS_SOURCES = {
     { url: "https://www.itmedia.co.jp/news/subtop/aiplus/index.rdf", source: "ITmedia AI+", keywords: ["AI", "人工知能", "機械学習"] },
   ],
   general: [
-    { url: "https://news.yahoo.co.jp/rss/topics/top-picks.xml", source: "Yahoo!ニュース", keywords: [] },
-    { url: "https://www.nikkei.com/rss/index.rdf",              source: "日経新聞",       keywords: [] },
+    { url: "https://news.yahoo.co.jp/rss/topics/top-picks.xml", source: "Yahoo!ニュース",         keywords: [] },
+    { url: "https://news.yahoo.co.jp/rss/topics/business.xml",  source: "Yahoo!ニュース ビジネス", keywords: [] },
   ],
   itconsult: [
     { url: "https://www.itmedia.co.jp/enterprise/subtop/features/rss.xml", source: "ITmedia エンタープライズ", keywords: ["DX", "デジタル", "クラウド", "コンサル", "システム", "SAP", "ERP", "導入", "IT"] },
