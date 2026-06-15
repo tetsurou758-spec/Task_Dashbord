@@ -284,9 +284,42 @@ function extractWithReadability(html, url) {
   }
 }
 
+// Google News URLをデコードして実記事URLを取得（CBMi...はbase64エンコードされたprotobuf）
+function decodeGoogleNewsUrl(googleUrl) {
+  try {
+    const match = googleUrl.match(/articles\/(CBMi[A-Za-z0-9_-]+)/);
+    if (!match) return null;
+    // URL-safe base64 → 標準base64 → Buffer
+    const b64 = match[1].replace(/-/g, '+').replace(/_/g, '/');
+    const bytes = Buffer.from(b64, 'base64');
+    // バイト列中の https:// を検索してURLを抽出
+    const byteStr = bytes.toString('latin1');
+    const httpIdx = byteStr.indexOf('http');
+    if (httpIdx === -1) return null;
+    let url = '';
+    for (let i = httpIdx; i < bytes.length; i++) {
+      const c = bytes[i];
+      if (c < 0x20 || c > 0x7e) break;
+      url += String.fromCharCode(c);
+    }
+    return url || null;
+  } catch { return null; }
+}
+
 // IPC: 記事のテキスト全文を取得して返す（Readability優先・フォールバック付き）
 ipcMain.handle('fetch-article-text', async (_, url) => {
   try {
+    // Google News URLは実記事URLにデコードしてからフェッチ
+    if (url.includes('news.google.com')) {
+      const decoded = decodeGoogleNewsUrl(url);
+      console.log(`[fetch-article-text] Google News decode: ${decoded || 'FAILED'}`);
+      if (decoded) {
+        url = decoded;
+      } else {
+        return { ok: false, reason: 'blocked', error: 'Google News URLのデコードに失敗' };
+      }
+    }
+
     let html = await fetchUrl(url);
 
     // meta-refreshリダイレクトの追跡（最大2回）
