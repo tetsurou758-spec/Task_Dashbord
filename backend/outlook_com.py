@@ -22,9 +22,19 @@ def _get_outlook():
 
     import time, subprocess, os
 
-    # Outlookが未起動なら起動する
+    # Outlookが未起動の場合のみ起動する（多重起動防止）
     outlook_exe = r"C:\Program Files\Microsoft Office\root\Office16\OUTLOOK.EXE"
-    if os.path.exists(outlook_exe):
+    already_running = False
+    try:
+        result = subprocess.run(
+            ["tasklist", "/FI", "IMAGENAME eq OUTLOOK.EXE", "/NH"],
+            capture_output=True, text=True
+        )
+        already_running = "OUTLOOK.EXE" in result.stdout
+    except Exception:
+        pass
+
+    if not already_running and os.path.exists(outlook_exe):
         subprocess.Popen(outlook_exe)
         time.sleep(10)  # 起動完了＋MAPI接続初期化待ち
 
