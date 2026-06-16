@@ -20,17 +20,27 @@ def _get_outlook():
     except ImportError:
         raise RuntimeError("pywin32がインストールされていません。pip install pywin32 を実行してください。")
 
-    import time
+    import time, subprocess, os
+
+    # Outlookが未起動なら起動する
+    outlook_exe = r"C:\Program Files\Microsoft Office\root\Office16\OUTLOOK.EXE"
+    if os.path.exists(outlook_exe):
+        subprocess.Popen(outlook_exe)
+        time.sleep(10)  # 起動完了＋MAPI接続初期化待ち
+
     last_err = None
-    for attempt in range(3):  # 最大3回リトライ
+    for attempt in range(5):  # 最大5回リトライ（起動直後は時間がかかる）
         try:
-            return win32com.client.Dispatch("Outlook.Application")
+            app = win32com.client.Dispatch("Outlook.Application")
+            # GetNamespace で MAPI 接続確認（ここで「接続されていません」が出る場合あり）
+            ns = app.GetNamespace("MAPI")
+            ns.GetDefaultFolder(6)  # 受信トレイへのアクセスで初期化完了を確認
+            return app
         except Exception as e:
             last_err = e
-            # RPC_E_CALL_REJECTED (-2147418111) はOutlook起動中の一時的なエラー
-            if attempt < 2:
-                time.sleep(3)
-    raise RuntimeError(f"Outlookに接続できません（起動しているか確認してください）: {last_err}")
+            if attempt < 4:
+                time.sleep(5)  # 5秒待ってリトライ
+    raise RuntimeError(f"Outlookに接続できません: {last_err}")
 
 
 def fetch_inbox_mails(max_items: int = 50, days_back: int = 7) -> list[dict]:
@@ -45,7 +55,7 @@ def fetch_inbox_mails(max_items: int = 50, days_back: int = 7) -> list[dict]:
         メール情報のリスト
     """
     outlook = _get_outlook()
-    ns = outlook.GetNamespace("MAPI")
+    ns = outlook.GetNamespace("MAPI")  # _get_outlook()内で初期化済みのため即時成功
     inbox = ns.GetDefaultFolder(6)  # 6 = 受信トレイ
 
     items = inbox.Items
