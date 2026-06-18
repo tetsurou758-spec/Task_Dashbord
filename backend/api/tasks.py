@@ -1,10 +1,32 @@
 """タスク一覧API（Phase 2: Outlookキャッシュからタスクを返す）"""
 from fastapi import APIRouter
+from pydantic import BaseModel
 import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 router = APIRouter()
+
+
+class OpenMailModel(BaseModel):
+    id: str
+
+
+@router.post("/open")
+async def open_mail(req: OpenMailModel):
+    """タスクIDからOutlookの元メールを開く（id形式: outlook_{EntryID}）"""
+    try:
+        if not req.id.startswith("outlook_"):
+            return {"status": "error", "message": "Outlookメールではありません"}
+        entry_id = req.id[len("outlook_"):]
+        import win32com.client
+        app = win32com.client.Dispatch("Outlook.Application")
+        ns = app.GetNamespace("MAPI")
+        mail = ns.GetItemFromID(entry_id)
+        mail.Display()  # Outlookで元メールを開く
+        return {"status": "ok"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 @router.get("/")
 async def get_tasks():

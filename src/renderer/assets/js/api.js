@@ -6,6 +6,14 @@ const api = {
     const res = await fetch(`${API_BASE}/tasks/`);
     return res.json();
   },
+  async openMail(id) {
+    const res = await fetch(`${API_BASE}/tasks/open`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    });
+    return res.json();
+  },
   async getNews(category = 'insurance') {
     const res = await fetch(`${API_BASE}/news/?category=${category}`);
     return res.json();

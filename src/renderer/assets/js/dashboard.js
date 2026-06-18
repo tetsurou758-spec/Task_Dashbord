@@ -113,8 +113,17 @@ function openModal(id) {
   document.getElementById('modal-body').textContent = t.body_snippet;
   document.getElementById('modal-reason').textContent = '🤖 AI判定: ' + t.priority_reason;
   const openBtn = document.getElementById('modal-open-source');
-  if (t.source_url) {
+  if (t.source === 'outlook' && t.id) {
+    // Outlookメールは元メールをOutlookで開く
     openBtn.style.display = '';
+    openBtn.textContent = '📧 Outlookで開く';
+    openBtn.onclick = async () => {
+      const r = await api.openMail(t.id);
+      if (r.status !== 'ok') alert('メールを開けませんでした: ' + (r.message || ''));
+    };
+  } else if (t.source_url) {
+    openBtn.style.display = '';
+    openBtn.textContent = '🔗 元のメッセージを開く';
     openBtn.onclick = () => openSource(t.source_url);
   } else {
     openBtn.style.display = 'none';
