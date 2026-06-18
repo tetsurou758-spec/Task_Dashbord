@@ -14,11 +14,20 @@ async def get_tasks():
     """
     try:
         from outlook_com import load_cache
+        from api.settings import load_settings
         cache = load_cache()
         mails = cache.get("mails", [])
 
+        # 設定の検出キーワードでメールを絞り込む（いずれかを含むメールのみタスク化）
+        settings = load_settings()
+        keywords = settings.get("keywords", [])
+
         tasks = []
         for m in mails:
+            text = (m["subject"] + " " + m["body_snippet"])
+            # キーワード未設定時は全件、設定時はいずれか含むもののみ
+            if keywords and not any(kw in text for kw in keywords):
+                continue
             priority, reason = _simple_priority(m["subject"], m["body_snippet"])
             tasks.append({
                 "id":           m["id"],
