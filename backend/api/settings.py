@@ -6,7 +6,7 @@ import json, os
 
 router = APIRouter()
 
-SETTINGS_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "db", "settings.json")
+SETTINGS_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "db", "settings.json")
 
 DEFAULT_SETTINGS = {
     "tools": ["outlook", "teams", "slack"],

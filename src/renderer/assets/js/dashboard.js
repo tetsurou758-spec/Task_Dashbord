@@ -112,7 +112,14 @@ function openModal(id) {
   pb.className = 'priority-badge ' + t.priority;
   document.getElementById('modal-body').textContent = t.body_snippet;
   document.getElementById('modal-reason').textContent = '🤖 AI判定: ' + t.priority_reason;
-  document.getElementById('modal-open-source').onclick = () => openSource(t.source_url);
+  const openBtn = document.getElementById('modal-open-source');
+  if (t.source_url) {
+    openBtn.style.display = '';
+    openBtn.onclick = () => openSource(t.source_url);
+  } else {
+    openBtn.style.display = 'none';
+    openBtn.onclick = null;
+  }
   const doneBtn = document.getElementById('modal-toggle-done');
   doneBtn.textContent = t.is_done ? '↩ 未対応に戻す' : '✅ 完了にする';
   doneBtn.onclick = () => { toggleDone(t.id); closeModal(); };
