@@ -53,13 +53,8 @@ document.getElementById('btn-save').addEventListener('click', async () => {
     tools,
     keywords,
     sync_interval_minutes: parseInt(document.getElementById('sync-interval').value),
-    azure: {
-      client_id: document.getElementById('azure-client-id').value,
-      tenant_id: document.getElementById('azure-tenant-id').value,
-    },
-    slack: {
-      team_id: document.getElementById('slack-team-id').value,
-    },
+    outlook_days_back: parseInt(document.getElementById('outlook-days-back').value),
+    outlook_max_items: parseInt(document.getElementById('outlook-max-items').value),
   };
   try {
     await api.saveSettings(data);
@@ -92,6 +87,12 @@ async function init() {
     });
     if (s.sync_interval_minutes) {
       document.getElementById('sync-interval').value = s.sync_interval_minutes;
+    }
+    if (s.outlook_days_back) {
+      document.getElementById('outlook-days-back').value = s.outlook_days_back;
+    }
+    if (s.outlook_max_items) {
+      document.getElementById('outlook-max-items').value = s.outlook_max_items;
     }
   } catch { /* バックエンド未起動時はデフォルト値を使用 */ }
 

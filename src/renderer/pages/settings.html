@@ -32,34 +32,30 @@
       </div>
     </section>
 
-    <!-- Microsoft認証 -->
+    <!-- Outlook取得設定 -->
     <section class="settings-section">
-      <h3>🔑 Microsoft 認証情報（Outlook / Teams）</h3>
+      <h3>📧 Outlook 取得設定</h3>
       <div class="form-row">
-        <label class="form-label">Azure Client ID</label>
-        <input type="text" id="azure-client-id" class="form-input" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+        <label class="form-label">メール取得期間</label>
+        <select id="outlook-days-back" class="form-input" style="width:auto">
+          <option value="7">過去7日間</option>
+          <option value="14">過去14日間</option>
+          <option value="30">過去30日間</option>
+          <option value="90" selected>過去90日間</option>
+          <option value="180">過去180日間</option>
+          <option value="365">過去1年間</option>
+        </select>
       </div>
       <div class="form-row">
-        <label class="form-label">Azure Client Secret</label>
-        <input type="password" id="azure-client-secret" class="form-input" placeholder="••••••••••••••••">
+        <label class="form-label">最大取得件数</label>
+        <select id="outlook-max-items" class="form-input" style="width:auto">
+          <option value="20">20件</option>
+          <option value="50" selected>50件</option>
+          <option value="100">100件</option>
+          <option value="200">200件</option>
+        </select>
       </div>
-      <div class="form-row">
-        <label class="form-label">Azure Tenant ID</label>
-        <input type="text" id="azure-tenant-id" class="form-input" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
-      </div>
-    </section>
-
-    <!-- Slack認証 -->
-    <section class="settings-section">
-      <h3>🟢 Slack 認証情報</h3>
-      <div class="form-row">
-        <label class="form-label">Bot Token</label>
-        <input type="password" id="slack-bot-token" class="form-input" placeholder="xoxb-••••••••••••">
-      </div>
-      <div class="form-row">
-        <label class="form-label">Team ID</label>
-        <input type="text" id="slack-team-id" class="form-input" placeholder="T0123456789">
-      </div>
+      <p class="form-note">※ Outlookがインストール・起動済みの場合に有効</p>
     </section>
 
     <!-- タスク検出キーワード -->
