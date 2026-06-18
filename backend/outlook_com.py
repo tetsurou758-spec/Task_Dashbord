@@ -53,7 +53,7 @@ def _get_outlook():
     raise RuntimeError(f"Outlookに接続できません: {last_err}")
 
 
-def fetch_inbox_mails(max_items: int = 50, days_back: int = 7) -> list[dict]:
+def fetch_inbox_mails(max_items: int = 50, days_back: int = 90) -> list[dict]:
     """
     受信トレイから直近のメールを取得する
 
@@ -65,46 +65,58 @@ def fetch_inbox_mails(max_items: int = 50, days_back: int = 7) -> list[dict]:
         メール情報のリスト
     """
     outlook = _get_outlook()
-    ns = outlook.GetNamespace("MAPI")  # _get_outlook()内で初期化済みのため即時成功
-    inbox = ns.GetDefaultFolder(6)  # 6 = 受信トレイ
-
-    items = inbox.Items
-    items.Sort("[ReceivedTime]", True)  # 新着順
-
-    cutoff = datetime.now() - timedelta(days=days_back)
+    ns = outlook.GetNamespace("MAPI")
+    from datetime import timezone
+    cutoff = datetime.now(timezone.utc) - timedelta(days=days_back)
     results = []
 
-    for i, msg in enumerate(items):
-        if i >= max_items:
-            break
+    # 全アカウントの全フォルダを走査してメールを収集
+    for acct_idx in range(1, ns.Folders.Count + 1):
         try:
-            received = msg.ReceivedTime
-            # pywin32のDateTimeはpydatetimeに変換
-            if hasattr(received, 'strftime'):
-                received_dt = received
-            else:
-                from pywintypes import Time as PywintypesTime
-                received_dt = datetime(
-                    received.year, received.month, received.day,
-                    received.hour, received.minute, received.second
-                )
-
-            if received_dt < cutoff:
-                break  # 日付でソート済みなので古いものに達したら終了
-
-            results.append({
-                "id":           f"outlook_{msg.EntryID if hasattr(msg, 'EntryID') else i}",
-                "source":       "outlook",
-                "subject":      msg.Subject or "(件名なし)",
-                "sender":       msg.SenderName or msg.SenderEmailAddress or "不明",
-                "received_at":  received_dt.isoformat(),
-                "body_snippet": (msg.Body or "")[:300].strip(),
-                "unread":       bool(msg.UnRead),
-                "to":           msg.To or "",
-                "cc":           msg.CC or "",
-            })
+            account_folder = ns.Folders.Item(acct_idx)
         except Exception:
             continue
+        for folder_idx in range(1, account_folder.Folders.Count + 1):
+            try:
+                inbox = account_folder.Folders.Item(folder_idx)
+                if inbox.Items.Count == 0:
+                    continue
+            except Exception:
+                continue
+
+            items = inbox.Items
+            try:
+                items.Sort("[ReceivedTime]", True)
+            except Exception:
+                pass
+
+            for i, msg in enumerate(items):
+                if len(results) >= max_items:
+                    break
+                try:
+                    received = msg.ReceivedTime
+                    if hasattr(received, 'strftime'):
+                        received_dt = received
+                    else:
+                        received_dt = datetime(
+                            received.year, received.month, received.day,
+                            received.hour, received.minute, received.second
+                        )
+                    if received_dt < cutoff:
+                        break
+                    results.append({
+                        "id":           f"outlook_{msg.EntryID if hasattr(msg, 'EntryID') else i}",
+                        "source":       "outlook",
+                        "subject":      msg.Subject or "(件名なし)",
+                        "sender":       msg.SenderName or msg.SenderEmailAddress or "不明",
+                        "received_at":  received_dt.isoformat(),
+                        "body_snippet": (msg.Body or "")[:300].strip(),
+                        "unread":       bool(msg.UnRead),
+                        "to":           msg.To or "",
+                        "cc":           msg.CC or "",
+                    })
+                except Exception:
+                    continue
 
     return results
 
@@ -158,7 +170,7 @@ def load_cache() -> dict:
     return {"updated_at": None, "mails": []}
 
 
-def get_mails_with_fallback(max_items: int = 50, days_back: int = 7) -> dict:
+def get_mails_with_fallback(max_items: int = 50, days_back: int = 90) -> dict:
     """
     Outlookから取得（失敗時はキャッシュを返す）
     フロントエンド向けのメイン関数

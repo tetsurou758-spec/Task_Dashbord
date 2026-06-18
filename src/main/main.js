@@ -13,8 +13,11 @@ let backendProcess;
 
 // バックエンド（FastAPI）を起動
 function startBackend() {
-  backendProcess = spawn('python', [path.join(__dirname, '../../backend/app.py')], {
-    cwd: path.join(__dirname, '../..'),
+  const projectRoot = path.join(__dirname, '..', '..');
+  const backendScript = path.join(projectRoot, 'backend', 'app.py');
+  backendProcess = spawn('python', [backendScript], {
+    cwd: path.join(projectRoot, 'backend'),
+    env: { ...process.env, BACKEND_PORT: '8001' },
   });
   backendProcess.stdout.on('data', (d) => console.log('[backend]', d.toString()));
   backendProcess.stderr.on('data', (d) => console.error('[backend]', d.toString()));

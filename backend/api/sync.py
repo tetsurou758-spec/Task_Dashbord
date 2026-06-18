@@ -12,7 +12,7 @@ async def trigger_sync():
     """Outlookから最新メールを取得してキャッシュを更新"""
     try:
         from outlook_com import get_mails_with_fallback
-        result = get_mails_with_fallback(max_items=50, days_back=7)
+        result = get_mails_with_fallback(max_items=50, days_back=90)
         return {
             "status":     "ok",
             "source":     result["source"],
