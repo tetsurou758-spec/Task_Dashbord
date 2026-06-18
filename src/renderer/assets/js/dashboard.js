@@ -226,8 +226,10 @@ function openSource(url) {
 async function loadTasks() {
   try {
     const data = await api.getTasks();
-    allTasks = data.tasks && data.tasks.length > 0 ? data.tasks : DEMO_TASKS;
+    // バックエンドが正常応答したら実データを使う（0件でもダミーにしない）
+    allTasks = Array.isArray(data.tasks) ? data.tasks : DEMO_TASKS;
   } catch {
+    // バックエンド未起動・通信失敗時のみダミーを表示
     allTasks = DEMO_TASKS;
   }
   updateSummary(allTasks);
