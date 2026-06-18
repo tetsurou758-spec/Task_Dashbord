@@ -39,16 +39,6 @@ function addKeyword() {
 document.getElementById('btn-save').addEventListener('click', async () => {
   const tools = [...document.querySelectorAll('input[name="tool"]:checked')].map(el => el.value);
 
-  // Anthropic API Key はlocalStorageに保存（バックエンドに送らない）
-  const apiKey = document.getElementById('anthropic-api-key').value.trim();
-  if (apiKey) {
-    localStorage.setItem('task_dashbord_anthropic_key', apiKey);
-    updateLlmStatus(true);
-  } else {
-    localStorage.removeItem('task_dashbord_anthropic_key');
-    updateLlmStatus(false);
-  }
-
   const data = {
     tools,
     keywords,
@@ -58,16 +48,11 @@ document.getElementById('btn-save').addEventListener('click', async () => {
   };
   try {
     await api.saveSettings(data);
-  } catch { /* バックエンド未起動でも続行 */ }
-  showToast('✅ 設定を保存しました');
+    showToast('✅ 設定を保存しました');
+  } catch (e) {
+    showToast('⚠️ 保存に失敗しました（バックエンド未起動）');
+  }
 });
-
-function updateLlmStatus(enabled) {
-  const el = document.getElementById('llm-status');
-  if (!el) return;
-  el.textContent = enabled ? '✅ AI本文抽出：有効（スクラップ時に自動適用）' : '— 未設定（ヒューリスティック抽出のみ）';
-  el.style.color = enabled ? '#43a047' : 'var(--text-muted)';
-}
 
 function showToast(msg) {
   const t = document.createElement('div');
@@ -81,10 +66,11 @@ async function init() {
   try {
     const s = await api.getSettings();
     if (s.keywords && s.keywords.length) keywords = s.keywords;
-    s.tools?.forEach(tool => {
-      const el = document.querySelector(`input[value="${tool}"]`);
-      if (el) el.checked = true;
-    });
+    if (s.tools) {
+      document.querySelectorAll('input[name="tool"]').forEach(el => {
+        el.checked = s.tools.includes(el.value);
+      });
+    }
     if (s.sync_interval_minutes) {
       document.getElementById('sync-interval').value = s.sync_interval_minutes;
     }
@@ -95,15 +81,6 @@ async function init() {
       document.getElementById('outlook-max-items').value = s.outlook_max_items;
     }
   } catch { /* バックエンド未起動時はデフォルト値を使用 */ }
-
-  // Anthropic API Key をlocalStorageから復元（表示はマスク）
-  const savedKey = localStorage.getItem('task_dashbord_anthropic_key') || '';
-  if (savedKey) {
-    document.getElementById('anthropic-api-key').placeholder = '設定済み（変更する場合は入力）';
-    updateLlmStatus(true);
-  } else {
-    updateLlmStatus(false);
-  }
 
   renderKeywords();
 }
