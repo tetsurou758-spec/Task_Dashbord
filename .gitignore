@@ -16,6 +16,8 @@ dist/
 # データ・キャッシュ（ローカル生成物）
 data/db/*.db
 data/cache/
+db/
+backend/db/
 
 # ログ
 logs/*.log
