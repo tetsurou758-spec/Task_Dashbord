@@ -26,9 +26,10 @@ def _parse_markdown_questions(text: str) -> list[dict]:
     形式: 「## …」で始まる行を問題、その下の「### …」以降を解答とみなす。
     （見出しレベルの揺れに強いよう ##/### を緩く解釈）"""
     questions = []
-    # "## " 単位でブロック分割（先頭の空ブロックは除く）
+    # "## " 単位でブロック分割。先頭ブロック(blocks[0])は最初の## より前の
+    # タイトル・前書き部分なので除外する
     blocks = re.split(r'(?m)^\s*##\s+(?!#)', text)
-    for block in blocks:
+    for block in blocks[1:]:
         block = block.strip()
         if not block:
             continue
