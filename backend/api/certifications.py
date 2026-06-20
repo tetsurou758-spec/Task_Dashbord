@@ -40,8 +40,17 @@ def _parse_markdown_questions(text: str) -> list[dict]:
         # 先頭の "Q1" "問1" 等のラベルは表示側で付け直すため軽く除去
         q = re.sub(r'^(Q\s*\d+|問\s*\d+)[\.\：:、]?\s*', '', q)
         a = re.sub(r'^(A|解答|答|解説)[\.\：:、]?\s*', '', a)
+        # 解答内の任意の参考リンクを抽出（「参考: URL」or Markdownリンク）
+        ref = ""
+        m = re.search(r'(?m)^\s*(?:参考|ref)\s*[:：]\s*(\S+)\s*$', a)
+        if not m:
+            m = re.search(r'\[[^\]]*\]\((https?://\S+)\)', a)
+        if m:
+            ref = m.group(1)
+            # 参考行を解答本文から取り除く
+            a = re.sub(r'(?m)^\s*(?:参考|ref)\s*[:：].*$', '', a).strip()
         if q:
-            questions.append({"q": q, "a": a})
+            questions.append({"q": q, "a": a, "ref": ref})
     return questions
 
 
@@ -140,7 +149,9 @@ _HEADERS = {
 
 def _scrape_exam_date(cert_id: str, config: dict) -> dict:
     """公式サイトから試験日らしき日付を抽出する（best-effort）。
+    抽出した日付を正規化し、最も近い未来の日付を next_date として返す。
     失敗時は空dictを返し、呼び出し側でシードにフォールバックする。"""
+    from datetime import date
     result = {}
     try:
         res = requests.get(config["official_url"], headers=_HEADERS, timeout=8)
@@ -148,18 +159,21 @@ def _scrape_exam_date(cert_id: str, config: dict) -> dict:
         soup = BeautifulSoup(res.text, "html.parser")
         text = soup.get_text(separator=" ", strip=True)
 
-        import re
-        # 「2025年11月8日」「2025/11/08」「2025-11-08」等の日付表現を抽出
-        patterns = [
-            r"\d{4}\s*年\s*\d{1,2}\s*月\s*\d{1,2}\s*日",
-            r"\d{4}[/-]\d{1,2}[/-]\d{1,2}",
-        ]
-        found = []
-        for p in patterns:
-            found.extend(re.findall(p, text))
-        if found:
-            # 最初に見つかった日付を「次の試験日候補」として返す
-            result["scraped_dates"] = found[:5]
+        # 「2025年11月8日」「2025/11/08」「2025-11-08」等を抽出して(年,月,日)に正規化
+        candidates = []
+        for m in re.finditer(r"(\d{4})\s*[年/\-]\s*(\d{1,2})\s*[月/\-]\s*(\d{1,2})", text):
+            y, mo, d = int(m.group(1)), int(m.group(2)), int(m.group(3))
+            try:
+                candidates.append(date(y, mo, d))
+            except ValueError:
+                continue
+        if candidates:
+            today = date.today()
+            future = sorted([d for d in candidates if d >= today])
+            display = sorted(set(d.isoformat() for d in candidates))[:6]
+            result["scraped_dates"] = display
+            if future:
+                result["next_date"] = future[0].isoformat()
     except Exception as e:
         result["scrape_error"] = str(e)
     return result
@@ -185,10 +199,24 @@ async def get_certification(cert_id: str):
 
     scraped = _scrape_exam_date(cert_id, config)
 
+    # 試験日：公式サイトから取得できた最も近い未来の日付を優先、無ければシード
+    if scraped.get("next_date"):
+        exam_date = scraped["next_date"]
+        exam_date_source = "web"
+    else:
+        exam_date = config["exam_date"]
+        exam_date_source = "seed"
+
     # 外部問題集（NotebookLM等で作成）があればそれを優先、無ければシード
     external = _load_external_questions(cert_id)
     questions = external if external else config["questions"]
     question_source = "file" if external else "seed"
+
+    # 各問題に参考リンクを付与（明示指定が無ければ問題文のWeb検索リンクを自動生成）
+    from urllib.parse import quote_plus
+    for q in questions:
+        if not q.get("ref"):
+            q["ref"] = "https://www.google.com/search?q=" + quote_plus(q["q"])
 
     return {
         "status":      "ok",
@@ -196,10 +224,11 @@ async def get_certification(cert_id: str):
         "name":        config["name"],
         "full_name":   config["full_name"],
         "official_url": config["official_url"],
-        "exam_date":   config["exam_date"],       # シードの確定値（表示の主役）
-        "deadline":    config["deadline"],
+        "exam_date":   exam_date,                  # web=公式取得 / seed=内蔵
+        "exam_date_source": exam_date_source,
+        "deadline":    config["deadline"],         # 締切は意味的特定が困難なためシード（公式要確認）
         "note":        config["note"],
         "questions":   questions,
-        "question_source": question_source,       # file=外部問題集 / seed=内蔵サンプル
-        "scraped":     scraped,                   # スクレイピングで拾えた日付候補（参考表示）
+        "question_source": question_source,        # file=外部問題集 / seed=内蔵サンプル
+        "scraped":     scraped,                    # スクレイピングで拾えた日付候補（参考表示）
     }

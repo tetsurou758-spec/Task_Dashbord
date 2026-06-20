@@ -35,7 +35,11 @@ function renderDetail(data) {
       ? `<div class="cert-scraped">🔎 公式サイトの自動取得に失敗（シード情報を表示中）</div>`
       : '';
 
-  const questionsHtml = (data.questions || []).map((q, i) => `
+  const questionsHtml = (data.questions || []).map((q, i) => {
+    const refHtml = q.ref
+      ? `<div class="cert-q-ref"><span class="cert-q-ref-link" data-url="${esc(q.ref)}">🔗 参考リンク（解説を調べる）</span></div>`
+      : '';
+    return `
     <div class="cert-q-item" data-qidx="${i}">
       <div class="cert-q-head">
         <span>Q${i + 1}. ${esc(q.q)}</span>
@@ -44,14 +48,15 @@ function renderDetail(data) {
       <div class="cert-q-answer">
         <div class="cert-q-answer-label">解答</div>
         ${esc(q.a)}
+        ${refHtml}
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 
   content.innerHTML = `
     <div class="cert-schedule">
       <div class="cert-schedule-item">
-        <div class="cert-schedule-label">📅 次の試験日</div>
+        <div class="cert-schedule-label">📅 次の試験日 ${data.exam_date_source === 'web' ? '<span style="font-weight:400;font-size:0.75rem;">(公式サイトより取得)</span>' : '<span style="font-weight:400;font-size:0.75rem;">(目安・公式要確認)</span>'}</div>
         <div class="cert-schedule-date">${esc(data.exam_date)}</div>
       </div>
       <div class="cert-schedule-item">
@@ -79,15 +84,15 @@ function renderDetail(data) {
     });
   });
 
-  // 公式サイトリンク（外部ブラウザで開く）
-  const link = content.querySelector('.cert-official-link');
-  if (link) {
-    link.addEventListener('click', () => {
+  // 公式サイトリンク・各問題の参考リンク（外部ブラウザで開く）
+  content.querySelectorAll('.cert-official-link, .cert-q-ref-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.stopPropagation();  // アコーディオン開閉に影響させない
       const url = link.dataset.url;
       if (window.electronAPI) window.electronAPI.openExternal(url);
       else window.open(url, '_blank');
     });
-  }
+  });
 }
 
 // 資格選択
