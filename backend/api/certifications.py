@@ -7,10 +7,58 @@
   キュレーション済みのサンプル問題（学習用）をシードとして保持
 """
 from fastapi import APIRouter
+import os
+import json
+import re
 import requests
 from bs4 import BeautifulSoup
 
 router = APIRouter()
+
+# NotebookLM等で作成した問題集の置き場（cert_idごとに1ファイル）
+#   questions_{cert_id}.md  … Markdown形式（## 問題文 / ### 解答）
+#   questions_{cert_id}.json … [{"q": "...", "a": "..."}, ...]
+DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+
+
+def _parse_markdown_questions(text: str) -> list[dict]:
+    """Markdownを問題リストに変換する。
+    形式: 「## …」で始まる行を問題、その下の「### …」以降を解答とみなす。
+    （見出しレベルの揺れに強いよう ##/### を緩く解釈）"""
+    questions = []
+    # "## " 単位でブロック分割（先頭の空ブロックは除く）
+    blocks = re.split(r'(?m)^\s*##\s+(?!#)', text)
+    for block in blocks:
+        block = block.strip()
+        if not block:
+            continue
+        # 解答区切り "### " で問題文と解答に分割
+        parts = re.split(r'(?m)^\s*###\s+', block, maxsplit=1)
+        q = parts[0].strip()
+        a = parts[1].strip() if len(parts) > 1 else ""
+        # 先頭の "Q1" "問1" 等のラベルは表示側で付け直すため軽く除去
+        q = re.sub(r'^(Q\s*\d+|問\s*\d+)[\.\：:、]?\s*', '', q)
+        a = re.sub(r'^(A|解答|答|解説)[\.\：:、]?\s*', '', a)
+        if q:
+            questions.append({"q": q, "a": a})
+    return questions
+
+
+def _load_external_questions(cert_id: str) -> list[dict] | None:
+    """data/questions_{cert_id}.(md|json) があれば読み込む。無ければNone。"""
+    md_path = os.path.join(DATA_DIR, f"questions_{cert_id}.md")
+    json_path = os.path.join(DATA_DIR, f"questions_{cert_id}.json")
+    try:
+        if os.path.exists(json_path):
+            with open(json_path, encoding="utf-8") as f:
+                data = json.load(f)
+            return [d for d in data if d.get("q")]
+        if os.path.exists(md_path):
+            with open(md_path, encoding="utf-8") as f:
+                return _parse_markdown_questions(f.read())
+    except Exception:
+        return None
+    return None
 
 # 5資格の設定とシードデータ（スクレイピング失敗時のフォールバック）
 CERT_CONFIG = {
@@ -53,30 +101,30 @@ CERT_CONFIG = {
             {"q": "教師あり学習で分類問題の評価に用いる指標を2つ挙げよ。", "a": "正解率（Accuracy）、適合率（Precision）、再現率（Recall）、F1スコア、AUCなど。"},
         ],
     },
-    "it_passport": {
-        "name": "ITパスポート",
-        "full_name": "ITパスポート試験（iパス）",
-        "official_url": "https://www3.jitec.ipa.go.jp/JitesCbt/index.html",
-        "exam_date": "随時（CBT方式・通年実施）",
-        "deadline": "受験日の前日まで",
-        "note": "IPA（情報処理推進機構）主催。CBT方式で通年・全国で随時受験可能。",
+    "ap": {
+        "name": "応用情報技術者試験",
+        "full_name": "応用情報技術者試験（AP）",
+        "official_url": "https://www.ipa.go.jp/shiken/kubun/ap.html",
+        "exam_date": "2025-10-12",
+        "deadline": "2025-08-21",
+        "note": "IPA主催。春期(4月)・秋期(10月)の年2回。午前(四択80問)・午後(記述5問)で構成。",
         "questions": [
-            {"q": "情報セキュリティの3要素（CIA）とは何か？", "a": "機密性（Confidentiality）、完全性（Integrity）、可用性（Availability）。"},
-            {"q": "PDCAサイクルの各文字が表すものを答えよ。", "a": "Plan（計画）・Do（実行）・Check（評価）・Act（改善）。"},
-            {"q": "リレーショナルデータベースで、表の行を一意に識別する列を何と呼ぶか？", "a": "主キー（プライマリキー）。"},
+            {"q": "ACID特性のうち、トランザクションが「全部成功」か「全部失敗」のいずれかになる性質は何か？", "a": "原子性（Atomicity）。"},
+            {"q": "RAID5の特徴を、冗長性とディスク本数の観点から説明せよ。", "a": "パリティを分散配置し、ディスク1台の故障に耐える。最低3台必要で、実効容量は(n-1)台分。"},
+            {"q": "公開鍵暗号方式で、送信者が受信者に暗号文を送る際に使う鍵はどれか？", "a": "受信者の公開鍵で暗号化し、受信者は自分の秘密鍵で復号する。"},
         ],
     },
-    "fe": {
-        "name": "基本情報技術者試験",
-        "full_name": "基本情報技術者試験（FE）",
-        "official_url": "https://www.ipa.go.jp/shiken/kubun/fe.html",
+    "python_ds": {
+        "name": "Python資格",
+        "full_name": "Python 3 エンジニア認定データ分析試験",
+        "official_url": "https://www.pythonic-exam.com/exam/analyist",
         "exam_date": "随時（CBT方式・通年実施）",
-        "deadline": "受験日の数日前まで",
-        "note": "IPA主催。2023年よりCBT方式で通年実施。科目A・科目Bで構成。",
+        "deadline": "受験日の前日まで",
+        "note": "一般社団法人Pythonエンジニア育成推進協会主催。NumPy・pandas・Matplotlib・scikit-learn等の data分析が範囲。CBTで通年受験可。",
         "questions": [
-            {"q": "2進数 1010 を10進数に変換せよ。", "a": "10。（8+0+2+0 = 10）"},
-            {"q": "アルゴリズムの計算量 O(n) と O(n^2) では、データ量が増えたときどちらが遅くなるか？", "a": "O(n^2)。データ量nの増加に対し処理時間が2乗で増加するため。"},
-            {"q": "TCP/IPの4階層モデルで、IPが属する層は何か？", "a": "インターネット層。"},
+            {"q": "pandasで、CSVファイルを読み込んでDataFrameにする関数は何か？", "a": "pd.read_csv()。"},
+            {"q": "NumPy配列 a の平均値を求めるメソッド／関数を答えよ。", "a": "a.mean() または np.mean(a)。"},
+            {"q": "教師あり学習で、連続値を予測するタスクと、カテゴリを予測するタスクをそれぞれ何と呼ぶか？", "a": "連続値＝回帰（regression）、カテゴリ＝分類（classification）。"},
         ],
     },
 }
@@ -136,6 +184,11 @@ async def get_certification(cert_id: str):
 
     scraped = _scrape_exam_date(cert_id, config)
 
+    # 外部問題集（NotebookLM等で作成）があればそれを優先、無ければシード
+    external = _load_external_questions(cert_id)
+    questions = external if external else config["questions"]
+    question_source = "file" if external else "seed"
+
     return {
         "status":      "ok",
         "id":          cert_id,
@@ -145,6 +198,7 @@ async def get_certification(cert_id: str):
         "exam_date":   config["exam_date"],       # シードの確定値（表示の主役）
         "deadline":    config["deadline"],
         "note":        config["note"],
-        "questions":   config["questions"],
+        "questions":   questions,
+        "question_source": question_source,       # file=外部問題集 / seed=内蔵サンプル
         "scraped":     scraped,                   # スクレイピングで拾えた日付候補（参考表示）
     }
