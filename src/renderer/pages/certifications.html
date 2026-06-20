@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>資格対策 - Task Dashbord</title>
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <style>
+    /* ===== 資格対策ページ専用スタイル ===== */
+    .cert-layout { max-width: 960px; margin: 0 auto; padding: 24px; }
+
+    /* タブ */
+    .cert-tabs {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      border-bottom: 2px solid var(--border); margin-bottom: 24px;
+    }
+    .cert-tab {
+      padding: 10px 18px; border: none; background: transparent;
+      font-size: 0.95rem; font-weight: 600; color: var(--text-muted);
+      cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px;
+      transition: all .15s;
+    }
+    .cert-tab:hover { color: var(--text); }
+    .cert-tab.active { color: #3b82f6; border-bottom-color: #3b82f6; }
+
+    /* 試験日程エリア */
+    .cert-schedule {
+      display: flex; gap: 24px; flex-wrap: wrap;
+      background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px;
+      padding: 24px; margin-bottom: 24px;
+    }
+    .cert-schedule-item { flex: 1; min-width: 200px; }
+    .cert-schedule-label { font-size: 0.85rem; color: #3b82f6; font-weight: 600; margin-bottom: 6px; }
+    .cert-schedule-date { font-size: 1.8rem; font-weight: 800; color: #1e3a8a; line-height: 1.2; }
+    .cert-note { font-size: 0.85rem; color: var(--text-muted); margin-top: 8px; }
+    .cert-official-link { display: inline-block; margin-top: 12px; font-size: 0.85rem; color: #3b82f6; cursor: pointer; }
+    .cert-scraped { font-size: 0.78rem; color: var(--text-muted); margin-top: 8px; }
+
+    /* 問題アコーディオン */
+    .cert-questions-title { font-size: 1.1rem; font-weight: 700; margin: 0 0 16px; }
+    .cert-q-item { border: 1px solid var(--border); border-radius: 10px; margin-bottom: 12px; overflow: hidden; }
+    .cert-q-head {
+      padding: 16px; cursor: pointer; font-weight: 600; background: var(--card-bg);
+      display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    }
+    .cert-q-head:hover { background: #f8fafc; }
+    .cert-q-toggle { color: #3b82f6; font-size: 0.85rem; white-space: nowrap; }
+    .cert-q-answer {
+      padding: 0 16px; max-height: 0; overflow: hidden;
+      background: #f0fdf4; border-top: 1px solid transparent;
+      transition: max-height .2s, padding .2s;
+    }
+    .cert-q-item.open .cert-q-answer { max-height: 400px; padding: 16px; border-top-color: #bbf7d0; }
+    .cert-q-answer-label { font-size: 0.8rem; color: #16a34a; font-weight: 700; margin-bottom: 6px; }
+
+    .cert-loading { text-align: center; padding: 40px; color: var(--text-muted); }
+  </style>
+</head>
+<body class="settings-page">
+
+  <header class="app-header">
+    <div class="header-left">
+      <button class="btn-icon-label" onclick="location.href='dashboard.html'">
+        <span>← 戻る</span>
+      </button>
+    </div>
+    <div class="header-center">
+      <span class="app-title">🎓 資格対策</span>
+    </div>
+    <div class="header-right">
+      <button id="btn-refresh" class="btn-icon-label" title="最新情報を取得">
+        <span class="btn-icon">🔄</span><span>更新</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="cert-layout">
+    <!-- タブ -->
+    <div id="cert-tabs" class="cert-tabs"></div>
+
+    <!-- 試験日程 -->
+    <div id="cert-content">
+      <div class="cert-loading">読み込み中...</div>
+    </div>
+  </div>
+
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/certifications.js"></script>
+</body>
+</html>

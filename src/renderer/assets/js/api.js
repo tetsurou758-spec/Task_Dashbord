@@ -38,4 +38,12 @@ const api = {
     const res = await fetch(`${API_BASE}/sync/status`);
     return res.json();
   },
+  async getCertifications() {
+    const res = await fetch(`${API_BASE}/certifications/`);
+    return res.json();
+  },
+  async getCertification(certId) {
+    const res = await fetch(`${API_BASE}/certifications/${certId}`);
+    return res.json();
+  },
 };
