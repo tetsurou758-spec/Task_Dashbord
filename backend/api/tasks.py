@@ -40,17 +40,48 @@ async def get_tasks():
         cache = load_cache()
         mails = cache.get("mails", [])
 
-        # 設定の検出キーワードでメールを絞り込む（いずれかを含むメールのみタスク化）
+        # 設定からキーワードと判定条件を取得
         settings = load_settings()
         keywords = settings.get("keywords", [])
+        mentions = settings.get("mentions", [])
+        condition = settings.get("keyword_condition", "OR")
+        check_to_only = settings.get("check_to_only", False)
 
         tasks = []
         for m in mails:
-            text = (m["subject"] + " " + m["body_snippet"])
-            # キーワード未設定時は全件、設定時はいずれか含むもののみ
-            if keywords and not any(kw in text for kw in keywords):
+            # 「宛先 (To)」の確認オプションが有効な場合、Toフィールドにメンションキーワードが含まれるかチェック
+            if check_to_only and mentions:
+                to_field = m.get("to", "")
+                if not any(mn in to_field for mn in mentions):
+                    continue
+
+            # 直近の本文（抽出されていなければスニペット）を判定対象にする
+            text_to_check = m.get("latest_body", m["body_snippet"])
+            
+            has_keyword = any(kw in text_to_check for kw in keywords) if keywords else False
+            has_mention = any(mn in text_to_check for mn in mentions) if mentions else False
+            
+            # 判定ロジック
+            is_task = False
+            if condition == "AND":
+                if keywords and mentions:
+                    is_task = has_keyword and has_mention
+                elif keywords:
+                    is_task = has_keyword
+                elif mentions:
+                    is_task = has_mention
+                else:
+                    is_task = True
+            else: # OR
+                if keywords or mentions:
+                    is_task = has_keyword or has_mention
+                else:
+                    is_task = True
+                    
+            if not is_task:
                 continue
-            priority, reason = _simple_priority(m["subject"], m["body_snippet"])
+
+            priority, reason = _simple_priority(m["subject"], text_to_check, has_mention)
             tasks.append({
                 "id":           m["id"],
                 "source":       "outlook",
@@ -69,13 +100,19 @@ async def get_tasks():
         return {"tasks": [], "error": str(e), "message": "Outlookキャッシュが見つかりません。同期ボタンを押してください。"}
 
 
-def _simple_priority(subject: str, body: str) -> tuple[str, str]:
+def _simple_priority(subject: str, body: str, has_mention: bool = False) -> tuple[str, str]:
     """Phase 4（AI判定）までの簡易キーワード優先度判定"""
     text = (subject + " " + body).lower()
     high_kw = ["至急", "緊急", "urgent", "asap", "本日中", "今日中", "締切", "期限", "重要"]
     low_kw  = ["fyi", "ご参考", "ニュースレター", "newsletter", "案内", "お知らせ"]
+    
     if any(k in text for k in high_kw):
         return "high", f"キーワード検出: {next(k for k in high_kw if k in text)}"
+        
+    if has_mention:
+        return "high", "自分宛てのメンションを検出"
+        
     if any(k in text for k in low_kw):
         return "low", f"キーワード検出: {next(k for k in low_kw if k in text)}"
-    return "medium", "通常メール（Phase 4でAI判定予定）"
+        
+    return "medium", "通常メール（直近本文からタスク化）"

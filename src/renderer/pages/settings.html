@@ -56,15 +56,53 @@
         </select>
       </div>
       <p class="form-note">※ Outlookがインストール・起動済みの場合に有効</p>
-    </section>
-
-    <!-- タスク検出キーワード -->
+    <!-- タスク抽出条件グループ -->
     <section class="settings-section">
-      <h3>🔍 タスク検出キーワード</h3>
-      <div id="keyword-area" class="keyword-area"></div>
-      <div class="keyword-input-row">
-        <input type="text" id="new-keyword" class="form-input" placeholder="キーワードを追加（例：ご対応）">
-        <button id="btn-add-keyword" class="btn-add">＋ 追加</button>
+      <h3 style="border-bottom: 2px solid var(--border); padding-bottom: 12px; margin-bottom: 24px;">🤖 タスク抽出の条件設定</h3>
+
+      <!-- 宛先Toの確認 -->
+      <div style="margin-bottom: 28px;">
+        <h4 style="font-size: 1.05rem; color: var(--text); margin: 0 0 8px 0;">📧 宛先 (To) の確認</h4>
+        <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="check-to-only" style="width: 16px; height: 16px;">
+          <span style="font-size: 0.9rem; color: var(--text-muted);">自分が「To (宛先)」に含まれているメールのみを対象にする（CCやメーリングリスト宛を除外）</span>
+        </label>
+      </div>
+
+      <!-- 宛先・メンションキーワード -->
+      <div style="margin-bottom: 24px;">
+        <h4 style="font-size: 1.05rem; color: var(--text); margin: 0 0 4px 0;">👤 宛先・メンションキーワード</h4>
+        <p class="settings-desc" style="margin-bottom: 12px;">直近のメール本文に自分やチーム名が含まれているかをチェックします</p>
+        <div id="mention-area" class="keyword-area"></div>
+        <div class="keyword-input-row">
+          <input type="text" id="new-mention" class="form-input" placeholder="キーワードを追加（例：自分、テツロウ、チーム名）">
+          <button id="btn-add-mention" class="btn-add">＋ 追加</button>
+        </div>
+      </div>
+
+      <!-- AND / OR 条件の区切りブロック -->
+      <div style="margin: 32px auto; text-align: center;">
+        <div style="display: inline-flex; background: #3b82f6; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(59,130,246,0.3);">
+          <label style="cursor: pointer; padding: 14px 48px; display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 1.3rem; color: #ffffff; border-right: 2px solid rgba(255,255,255,0.2); transition: background 0.2s;">
+            <input type="radio" name="keyword_condition" value="OR" style="width: 22px; height: 22px; cursor: pointer; accent-color: #1e3a8a;"> 
+            OR
+          </label>
+          <label style="cursor: pointer; padding: 14px 48px; display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 1.3rem; color: #ffffff; transition: background 0.2s;">
+            <input type="radio" name="keyword_condition" value="AND" style="width: 22px; height: 22px; cursor: pointer; accent-color: #1e3a8a;"> 
+            AND
+          </label>
+        </div>
+      </div>
+
+      <!-- 依頼キーワード -->
+      <div style="margin-bottom: 8px;">
+        <h4 style="font-size: 1.05rem; color: var(--text); margin: 0 0 4px 0;">🔍 依頼キーワード</h4>
+        <p class="settings-desc" style="margin-bottom: 12px;">タスクとみなすための依頼ワード</p>
+        <div id="keyword-area" class="keyword-area"></div>
+        <div class="keyword-input-row">
+          <input type="text" id="new-keyword" class="form-input" placeholder="キーワードを追加（例：ご対応）">
+          <button id="btn-add-keyword" class="btn-add">＋ 追加</button>
+        </div>
       </div>
     </section>
 

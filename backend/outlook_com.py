@@ -53,6 +53,28 @@ def _get_outlook():
     raise RuntimeError(f"Outlookに接続できません: {last_err}")
 
 
+def _extract_latest_body(body: str) -> str:
+    """返信時の引用（過去のメール）をカットして、直近の本文のみを抽出する"""
+    if not body:
+        return ""
+    separators = [
+        "________________________________",
+        "From:",
+        "差出人:",
+        "Original Message",
+        "-----Original Message-----",
+        ">",
+    ]
+    min_idx = len(body)
+    for sep in separators:
+        # ">" は行頭の引用符としてよく使われるので改行とセットで判定
+        search_str = "\n>" if sep == ">" else sep
+        idx = body.find(search_str)
+        if idx != -1 and idx < min_idx:
+            min_idx = idx
+    return body[:min_idx].strip()
+
+
 def fetch_inbox_mails(max_items: int = 50, days_back: int = 90) -> list[dict]:
     """
     受信トレイから直近のメールを取得する
@@ -111,6 +133,7 @@ def fetch_inbox_mails(max_items: int = 50, days_back: int = 90) -> list[dict]:
                         "sender":       msg.SenderName or msg.SenderEmailAddress or "不明",
                         "received_at":  received_dt.isoformat(),
                         "body_snippet": (msg.Body or "")[:300].strip(),
+                        "latest_body":  _extract_latest_body(msg.Body or ""),
                         "unread":       bool(msg.UnRead),
                         "to":           msg.To or "",
                         "cc":           msg.CC or "",
@@ -144,6 +167,7 @@ def fetch_flagged_mails() -> list[dict]:
                     "sender":       msg.SenderName or "",
                     "received_at":  str(msg.ReceivedTime),
                     "body_snippet": (msg.Body or "")[:300].strip(),
+                    "latest_body":  _extract_latest_body(msg.Body or ""),
                     "flagged":      True,
                 })
         except Exception:

@@ -11,6 +11,9 @@ SETTINGS_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.
 DEFAULT_SETTINGS = {
     "tools": ["outlook", "teams", "slack"],
     "keywords": ["お願いします", "ご対応", "確認してください", "対応お願い", "よろしくお願い"],
+    "mentions": ["自分"],
+    "keyword_condition": "OR",
+    "check_to_only": False,
     "sync_interval_minutes": 5,
     "outlook_days_back": 90,
     "outlook_max_items": 50,
@@ -19,6 +22,9 @@ DEFAULT_SETTINGS = {
 class SettingsModel(BaseModel):
     tools: List[str] = ["outlook", "teams", "slack"]
     keywords: List[str] = ["お願いします", "ご対応", "確認してください", "対応お願い", "よろしくお願い"]
+    mentions: List[str] = []
+    keyword_condition: str = "OR"
+    check_to_only: bool = False
     sync_interval_minutes: int = 5
     outlook_days_back: int = 90
     outlook_max_items: int = 50
