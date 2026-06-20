@@ -49,6 +49,38 @@
       color: var(--text); cursor: pointer; transition: all .15s;
     }
     .cert-tool-btn:hover { border-color: #3b82f6; color: #3b82f6; }
+    .cert-tool-btn.active { background: #3b82f6; color: #fff; border-color: #3b82f6; }
+
+    /* 統計バー */
+    .cert-stats {
+      font-size: 0.85rem; color: var(--text); background: #f8fafc;
+      border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-bottom: 16px;
+    }
+    .cert-stats b { color: #3b82f6; }
+    .cert-stats-reset { color: var(--text-muted); cursor: pointer; margin-left: 8px; font-size: 0.78rem; }
+    .cert-stats-reset:hover { color: #ef4444; text-decoration: underline; }
+
+    /* 苦手スター */
+    .cert-q-star { cursor: pointer; font-size: 1.1rem; flex-shrink: 0; color: #f59e0b; }
+    .cert-q-text { flex: 1; }
+
+    /* クイズ4択 */
+    .cert-quiz-item { border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 14px; background: var(--card-bg); }
+    .cert-quiz-q { font-weight: 700; margin-bottom: 12px; }
+    .cert-choices { display: flex; flex-direction: column; gap: 8px; }
+    .cert-choice {
+      text-align: left; padding: 10px 14px; border: 1px solid var(--border);
+      border-radius: 8px; background: var(--card-bg); color: var(--text); cursor: pointer;
+      font-size: 0.9rem; transition: all .12s;
+    }
+    .cert-choice:hover:not(:disabled) { border-color: #3b82f6; background: #eff6ff; }
+    .cert-choice:disabled { cursor: default; }
+    .cert-choice.correct { background: #f0fdf4; border-color: #16a34a; color: #15803d; font-weight: 600; }
+    .cert-choice.wrong { background: #fef2f2; border-color: #ef4444; color: #b91c1c; }
+    .cert-quiz-result { margin-top: 10px; font-weight: 700; }
+    .cert-quiz-result.ok { color: #16a34a; }
+    .cert-quiz-result.ng { color: #ef4444; }
+    .cert-quiz-answer { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); font-size: 0.9rem; }
 
     /* 問題アコーディオン */
     .cert-questions-title { font-size: 1.1rem; font-weight: 700; margin: 0 0 16px; }
