@@ -13,10 +13,10 @@
   },
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
-    "electron": "^30.0.0",
     "jsdom": "^20.0.3"
   },
   "devDependencies": {
+    "electron": "^30.0.0",
     "electron-builder": "^24.0.0"
   },
   "build": {
