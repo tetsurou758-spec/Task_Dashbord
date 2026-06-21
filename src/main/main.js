@@ -12,15 +12,28 @@ let mainWindow;
 let backendProcess;
 
 // バックエンド（FastAPI）を起動
+// 本番（パッケージ版）: 同梱した backend.exe を起動（Python不要）
+// 開発時: python backend/app.py を起動
 function startBackend() {
-  const projectRoot = path.join(__dirname, '..', '..');
-  const backendScript = path.join(projectRoot, 'backend', 'app.py');
-  backendProcess = spawn('python', [backendScript], {
-    cwd: path.join(projectRoot, 'backend'),
-    env: { ...process.env, BACKEND_PORT: '8001' },
-  });
+  const env = { ...process.env, BACKEND_PORT: '8001' };
+  if (app.isPackaged) {
+    // extraResources で resources/backend/ に同梱した実行ファイルを使う
+    const exeName = process.platform === 'win32' ? 'backend.exe' : 'backend';
+    const backendExe = path.join(process.resourcesPath, 'backend', exeName);
+    backendProcess = spawn(backendExe, [], {
+      cwd: path.dirname(backendExe),
+      env,
+    });
+  } else {
+    const projectRoot = path.join(__dirname, '..', '..');
+    backendProcess = spawn('python', [path.join(projectRoot, 'backend', 'app.py')], {
+      cwd: path.join(projectRoot, 'backend'),
+      env,
+    });
+  }
   backendProcess.stdout.on('data', (d) => console.log('[backend]', d.toString()));
   backendProcess.stderr.on('data', (d) => console.error('[backend]', d.toString()));
+  backendProcess.on('error', (e) => console.error('[backend] 起動失敗:', e.message));
 }
 
 function createWindow() {

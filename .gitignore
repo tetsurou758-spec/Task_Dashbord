@@ -13,6 +13,11 @@ venv/
 node_modules/
 dist/
 
+# ビルド成果物（PyInstaller / electron-builder）
+pybuild/
+build/
+*.exe
+
 # データ・キャッシュ（ローカル生成物）
 data/db/*.db
 data/cache/

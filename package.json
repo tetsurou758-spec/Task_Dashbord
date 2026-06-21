@@ -7,7 +7,9 @@
     "start": "electron .",
     "dev": "electron . --dev",
     "backend": "python backend/app.py",
-    "build": "electron-builder"
+    "build:backend": "pyinstaller backend.spec --noconfirm --distpath pybuild --workpath pybuild/work",
+    "build:installer": "electron-builder",
+    "dist": "npm run build:backend && npm run build:installer"
   },
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
@@ -23,8 +25,23 @@
     "directories": {
       "output": "dist"
     },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "pybuild/backend",
+        "to": "backend"
+      }
+    ],
     "win": {
       "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
     }
   },
   "author": "tetsurou758",

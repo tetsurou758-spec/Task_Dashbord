@@ -18,7 +18,11 @@ router = APIRouter()
 # NotebookLM等で作成した問題集の置き場（cert_idごとに1ファイル）
 #   questions_{cert_id}.md  … Markdown形式（## 問題文 / ### 解答）
 #   questions_{cert_id}.json … [{"q": "...", "a": "..."}, ...]
-DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+try:
+    from paths import data_dir
+except ImportError:
+    from backend.paths import data_dir
+DATA_DIR = data_dir()
 
 
 def _parse_markdown_questions(text: str) -> list[dict]:

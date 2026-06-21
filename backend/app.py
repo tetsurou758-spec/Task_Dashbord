@@ -26,4 +26,5 @@ app.include_router(certifications_router, prefix="/api/certifications")
 
 if __name__ == "__main__":
     port = int(os.getenv("BACKEND_PORT", 8001))
-    uvicorn.run("app:app", host="127.0.0.1", port=port, reload=False)
+    # exe化（PyInstaller）でも動くよう、import文字列ではなくappオブジェクトを渡す
+    uvicorn.run(app, host="127.0.0.1", port=port, reload=False)

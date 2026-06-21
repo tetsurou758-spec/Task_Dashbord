@@ -7,7 +7,36 @@ import os
 from datetime import datetime, timedelta
 from pathlib import Path
 
-CACHE_PATH = Path(__file__).parent.parent / "db" / "outlook_cache.json"
+try:
+    from paths import db_dir
+except ImportError:
+    from backend.paths import db_dir
+CACHE_PATH = Path(db_dir()) / "outlook_cache.json"
+
+
+def _find_outlook_exe():
+    """OUTLOOK.EXE のパスを自動探索する。見つからなければ None。"""
+    import os, glob
+    candidates = []
+    # よくある固定パス（Office16/15、32/64bit、Click-to-Run）
+    for base in [
+        os.environ.get("ProgramFiles", r"C:\Program Files"),
+        os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)"),
+    ]:
+        if not base:
+            continue
+        candidates += [
+            os.path.join(base, r"Microsoft Office\root\Office16\OUTLOOK.EXE"),
+            os.path.join(base, r"Microsoft Office\root\Office15\OUTLOOK.EXE"),
+            os.path.join(base, r"Microsoft Office\Office16\OUTLOOK.EXE"),
+            os.path.join(base, r"Microsoft Office\Office15\OUTLOOK.EXE"),
+        ]
+        # ワイルドカードでも探索
+        candidates += glob.glob(os.path.join(base, r"Microsoft Office\**\OUTLOOK.EXE"), recursive=True)
+    for c in candidates:
+        if c and os.path.exists(c):
+            return c
+    return None  # 見つからない場合はCOM側の起動に任せる
 
 
 def _get_outlook():
@@ -20,10 +49,10 @@ def _get_outlook():
     except ImportError:
         raise RuntimeError("pywin32がインストールされていません。pip install pywin32 を実行してください。")
 
-    import time, subprocess, os
+    import time, subprocess, os, glob
 
-    # Outlookが未起動の場合のみ起動する（多重起動防止）
-    outlook_exe = r"C:\Program Files\Microsoft Office\root\Office16\OUTLOOK.EXE"
+    # Outlook実行ファイルを自動探索（環境により設置場所が異なるため）
+    outlook_exe = _find_outlook_exe()
     already_running = False
     try:
         result = subprocess.run(
@@ -34,7 +63,7 @@ def _get_outlook():
     except Exception:
         pass
 
-    if not already_running and os.path.exists(outlook_exe):
+    if not already_running and outlook_exe and os.path.exists(outlook_exe):
         subprocess.Popen(outlook_exe)
         time.sleep(10)  # 起動完了＋MAPI接続初期化待ち
 
