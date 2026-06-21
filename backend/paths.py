@@ -15,8 +15,9 @@ def _is_frozen() -> bool:
 def data_dir() -> str:
     """読み取り専用の同梱データディレクトリ（questions_*.md 等）"""
     if _is_frozen():
-        # PyInstaller onedir: exe と同じフォルダの data
-        return os.path.join(os.path.dirname(sys.executable), "data")
+        # PyInstaller: datas は sys._MEIPASS（onedirでは _internal）に展開される
+        base = getattr(sys, "_MEIPASS", os.path.dirname(sys.executable))
+        return os.path.join(base, "data")
     # 開発時: backend/data
     return os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 
